@@ -182,6 +182,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
     registration_id  = data["registrationId"]
     user_id          = data.get("userId")  # facultatif, peut être null
     event_image_url  = data.get("eventImageUrl")  # facultatif, peut être null
+    template_type    = bool(data.get("template_type", False))  # bandeau RJP 2026 si True
     user_email       = data["userEmail"]
     user_first_name = data["userFirstName"]
     user_last_name  = data["userLastName"]
@@ -226,6 +227,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
             event_title, event_start, event_location,
             qr_base64, registration_id, qr_token,
             event_image_url=event_image_url,
+            template_type=template_type,
         )
 
     except Exception as e:

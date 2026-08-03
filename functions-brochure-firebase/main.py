@@ -116,24 +116,38 @@ def send_brochure_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedDa
             data.setdefault("company_email", "noreply@athena-event.com")
         elif event_type == "REMINDER":
             print("   • Rappel d'événement (J-1) détecté")
-            data.setdefault("staticTemplateNum", 8)
             data.setdefault("_hide_attachments_section", True)
             # Le backend peut envoyer "recipients", "destinataire" ou "destEmail"
             if not data.get("recipients"):
                 data["recipients"] = data.get("destinataire") or data.get("destEmail")
-            data["subject"] = "J-1 avant la conférence PostgreSQL User Group Madagascar – Préparez votre CV !"
-            data["eventTitle"] = "PostgreSQL User Group Madagascar"
+            # template_type=True → Rentrée du Jeune Patronat 2026, sinon Postgres (historique)
+            if bool(data.get("template_type", False)):
+                print("   • Variante Rentrée du Jeune Patronat 2026")
+                data["staticTemplateNum"] = 10
+                data["subject"] = "J-1 avant la Rentrée du Jeune Patronat 2026 !"
+                data["eventTitle"] = "2e édition de la Rentrée du Jeune Patronat"
+            else:
+                data.setdefault("staticTemplateNum", 8)
+                data["subject"] = "J-1 avant la conférence PostgreSQL User Group Madagascar – Préparez votre CV !"
+                data["eventTitle"] = "PostgreSQL User Group Madagascar"
             data.setdefault("company_name", "Athena Event")
             data.setdefault("company_email", "noreply@athena-event.com")
         elif event_type == "CUSTOM_EMAIL":
-            print("   • Email de remerciement post-événement (PGConf Madagascar) détecté")
-            data.setdefault("staticTemplateNum", 9)
+            print("   • Email de remerciement post-événement détecté")
             data.setdefault("_hide_attachments_section", True)
             # Le backend envoie "recipient" (singulier)
             if not data.get("recipients"):
                 data["recipients"] = data.get("recipient")
-            data["subject"] = "Merci d'avoir été des nôtres — Madagascar PostgreSQL Conference 2026"
-            data["eventTitle"] = "Madagascar PostgreSQL Conference 2026"
+            # template_type=True → Rentrée du Jeune Patronat 2026, sinon PGConf (historique)
+            if bool(data.get("template_type", False)):
+                print("   • Variante Rentrée du Jeune Patronat 2026")
+                data["staticTemplateNum"] = 11
+                data["subject"] = "Merci d'avoir été des nôtres — Rentrée du Jeune Patronat 2026"
+                data["eventTitle"] = "2e édition de la Rentrée du Jeune Patronat"
+            else:
+                data.setdefault("staticTemplateNum", 9)
+                data["subject"] = "Merci d'avoir été des nôtres — Madagascar PostgreSQL Conference 2026"
+                data["eventTitle"] = "Madagascar PostgreSQL Conference 2026"
             data.setdefault("company_name", "Athena Event")
             data.setdefault("company_email", "noreply@athena-event.com")
         else:

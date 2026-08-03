@@ -16,12 +16,14 @@ import os
 
 from storage import storage_client
 
-# Même bucket que main_2.py en production ; bucket démo de l'émulateur en local.
-BUCKET_NAME = (
-    "event-athena-prod-plaform.firebasestorage.app"
-    if os.environ.get("K_SERVICE")
-    else "demo-event-app.appspot.com"
-)
+# Bucket configuré via BADGES_BUCKET (standardisé avec badge_generator_code,
+# voir handlers/classic_ticket_handler.py) ; bucket démo de l'émulateur en local.
+if os.environ.get("K_SERVICE"):
+    BUCKET_NAME = os.environ.get("BADGES_BUCKET")
+    if not BUCKET_NAME:
+        logging.error("Variable BADGES_BUCKET manquante")
+else:
+    BUCKET_NAME = "demo-event-app.appspot.com"
 
 
 # ──────────────────────────────────────────────────────────────

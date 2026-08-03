@@ -23,5 +23,7 @@ TEMPLATES = {
     6: "email_contact_request.html",  # Demandes de mise en relation entre participants
     7: "email_contact_accepted.html",  # Acceptation d'une demande de mise en relation
     8: "email_reminder.html",  # Rappel d'événement (J-1)
-    9: "email_remerciement_pgconf.html"  # Remerciement post-événement (Madagascar PostgreSQL Conference 2026)
+    9: "email_remerciement_pgconf.html",  # Remerciement post-événement (Madagascar PostgreSQL Conference 2026)
+    10: "email_reminder_rjp.html",  # Rappel d'événement (J-1) — Rentrée du Jeune Patronat 2026
+    11: "email_remerciement_rjp.html",  # Remerciement post-événement — Rentrée du Jeune Patronat 2026
 }
