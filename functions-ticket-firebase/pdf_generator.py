@@ -17,13 +17,15 @@ import os
 from storage import storage_client
 
 # Bucket configuré via BADGES_BUCKET (standardisé avec badge_generator_code,
-# voir handlers/classic_ticket_handler.py) ; bucket démo de l'émulateur en local.
-if os.environ.get("K_SERVICE"):
+# voir handlers/classic_ticket_handler.py) ; bucket démo de l'émulateur en
+# local. Détection via FUNCTIONS_EMULATOR (voir storage.py — K_SERVICE seul
+# n'est pas fiable, l'émulateur Gen2 le définit aussi).
+if os.environ.get("FUNCTIONS_EMULATOR") == "true":
+    BUCKET_NAME = "demo-event-app.appspot.com"
+else:
     BUCKET_NAME = os.environ.get("BADGES_BUCKET")
     if not BUCKET_NAME:
         logging.error("Variable BADGES_BUCKET manquante")
-else:
-    BUCKET_NAME = "demo-event-app.appspot.com"
 
 
 # ──────────────────────────────────────────────────────────────

@@ -114,14 +114,14 @@ def send_brochure_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedDa
             data["eventTitle"] = "Mise en relation"
             data.setdefault("company_name", "Athena Event")
             data.setdefault("company_email", "noreply@athena-event.com")
-        elif event_type == "REMINDER":
+        elif event_type in ("REMINDER", "REMINDER_J12"):
             print("   • Rappel d'événement (J-1) détecté")
             data.setdefault("_hide_attachments_section", True)
             # Le backend peut envoyer "recipients", "destinataire" ou "destEmail"
             if not data.get("recipients"):
                 data["recipients"] = data.get("destinataire") or data.get("destEmail")
-            # template_type=True → Rentrée du Jeune Patronat 2026, sinon Postgres (historique)
-            if bool(data.get("template_type", False)):
+            # REMINDER_J12, ou legacy template_type=True → Rentrée du Jeune Patronat 2026, sinon Postgres (historique)
+            if event_type == "REMINDER_J12" or bool(data.get("template_type", False)):
                 print("   • Variante Rentrée du Jeune Patronat 2026")
                 data["staticTemplateNum"] = 10
                 data["subject"] = "J-1 avant la Rentrée du Jeune Patronat 2026 !"
@@ -132,14 +132,14 @@ def send_brochure_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedDa
                 data["eventTitle"] = "PostgreSQL User Group Madagascar"
             data.setdefault("company_name", "Athena Event")
             data.setdefault("company_email", "noreply@athena-event.com")
-        elif event_type == "CUSTOM_EMAIL":
+        elif event_type in ("CUSTOM_EMAIL", "CUSTOM_EMAIL_J12"):
             print("   • Email de remerciement post-événement détecté")
             data.setdefault("_hide_attachments_section", True)
             # Le backend envoie "recipient" (singulier)
             if not data.get("recipients"):
                 data["recipients"] = data.get("recipient")
-            # template_type=True → Rentrée du Jeune Patronat 2026, sinon PGConf (historique)
-            if bool(data.get("template_type", False)):
+            # CUSTOM_EMAIL_J12, ou legacy template_type=True → Rentrée du Jeune Patronat 2026, sinon PGConf (historique)
+            if event_type == "CUSTOM_EMAIL_J12" or bool(data.get("template_type", False)):
                 print("   • Variante Rentrée du Jeune Patronat 2026")
                 data["staticTemplateNum"] = 11
                 data["subject"] = "Merci d'avoir été des nôtres — Rentrée du Jeune Patronat 2026"
@@ -151,7 +151,7 @@ def send_brochure_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedDa
             data.setdefault("company_name", "Athena Event")
             data.setdefault("company_email", "noreply@athena-event.com")
         else:
-            print(f"⚠️ Type incorrect: {event_type}, attendu: BROCHURE, EVENT_REGISTRATION_REQUEST_SECOND_CONFIRMATION, EVENT_THANK_YOU, CONTACT_REQUEST, ACCEPT_CONTACT_REQUEST, REMINDER ou CUSTOM_EMAIL")
+            print(f"⚠️ Type incorrect: {event_type}, attendu: BROCHURE, EVENT_REGISTRATION_REQUEST_SECOND_CONFIRMATION, EVENT_THANK_YOU, CONTACT_REQUEST, ACCEPT_CONTACT_REQUEST, REMINDER, REMINDER_J12, CUSTOM_EMAIL ou CUSTOM_EMAIL_J12")
             return
         
         # 4. Envoyer l'email (orchéstrer validation + template + envoi)

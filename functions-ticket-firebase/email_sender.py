@@ -380,8 +380,9 @@ Antananarivo, Madagascar
     else:
         msg.attach(_load_logo_image_part())
 
+    sender_name = "RJP via Athena Event" if template_type else "Athena Event"
     msg['Subject']    = f"Confirmation d'inscription — {event_title}"
-    msg['From']       = f"Athena Event <{SMTP_USER}>"
+    msg['From']       = f"{sender_name} <{SMTP_USER}>"
     msg['To']         = email
     msg['Reply-To']   = SMTP_USER
     msg['Message-ID'] = f"<{registration_id}@athena-event.com>"
@@ -396,6 +397,7 @@ Antananarivo, Madagascar
         logging.info(f"Email billet envoyé à {email}")
     except Exception as e:
         logging.error(f"Erreur envoi email : {e}")
+        logging.error(f"Diagnostic — email param: {email!r} | msg['To']: {msg['To']!r} | SMTP_HOST: {SMTP_HOST!r}")
         raise
 
 
@@ -410,12 +412,17 @@ def send_ticket_email_multiticket(
     qr_tokens: list,
     registration_id: str,
     event_image_url: str = None,
+    template_type: bool = False,
 ):
     """
     Email de confirmation groupé : plusieurs billets (donc plusieurs QR codes,
     un par personne) envoyés dans un seul email à un même destinataire.
     Un bloc QR distinct est affiché par billet, chacun avec son propre
     Content-ID (qrcode1, qrcode2, ...) pour éviter tout conflit d'image inline.
+
+    template_type : True active le bandeau organisateur/sponsors RJP 2026 à la
+                     place du hero Athena Event standard — même mécanisme que
+                     send_ticket_email_with_qr.
     """
     SMTP_HOST     = os.environ.get("SMTP_HOST", "smtp.zeptomail.com")
     SMTP_PORT     = int(os.environ.get("SMTP_PORT", "587"))
@@ -467,13 +474,17 @@ def send_ticket_email_multiticket(
         )
 
     # ── Assemblage des blocs visuels ──
-    rows = (
+    header_block = (
+        _rjp2026_banner() if template_type else
         _hero(
             title="Confirmation d'inscription",
             subtitle=f"Vos {ticket_count} billets pour {safe_event_title}",
             email_type_label="Billets événement",
             hero_image_url=safe_event_image_url,
         )
+    )
+    rows = (
+        header_block
         + _body_open(
             greeting=f"Bonjour {safe_first_name} {safe_last_name},",
             intro=(
@@ -560,10 +571,17 @@ Antananarivo, Madagascar
         qr_image.add_header('Content-Disposition', 'inline', filename=f'qrcode{i}.png')
         msg.attach(qr_image)
 
-    msg.attach(_load_logo_image_part())
+    if template_type:
+        # Bandeau RJP 2026 : le logo Athena n'apparaît pas dans ce HTML (hero
+        # remplacé), on attache les 7 images du bandeau à la place.
+        for image_part in _load_rjp2026_image_parts():
+            msg.attach(image_part)
+    else:
+        msg.attach(_load_logo_image_part())
 
+    sender_name = "RJP via Athena Event" if template_type else "Athena Event"
     msg['Subject']    = f"Confirmation de vos {ticket_count} billets — {event_title}"
-    msg['From']       = f"Athena Event <{SMTP_USER}>"
+    msg['From']       = f"{sender_name} <{SMTP_USER}>"
     msg['To']         = email
     msg['Reply-To']   = SMTP_USER
     msg['Message-ID'] = f"<{registration_id}@athena-event.com>"

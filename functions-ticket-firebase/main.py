@@ -52,7 +52,9 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
     # ✅ ACCEPTER LES TYPES CONNUS
     ACCEPTED_TYPES = [
         "EVENT_REGISTRATION_CONFIRMED",
+        "EVENT_REGISTRATION_CONFIRMED_J12",
         "RESEND_REGISTRATION_CONFIRMED",
+        "RESEND_REGISTRATION_CONFIRMED_J12",
         "RESEND_REGISTRATION_CONFIRMED_INVITED",
         "EVENT_REGISTRATION_CONFIRMED_MULTITICKET",
     ]
@@ -71,6 +73,10 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
         missing_invited = [f for f in invited_required if f not in data]
         if missing_invited:
             logging.error(f"Champs manquants (invited): {missing_invited}")
+            return
+
+        if not data.get("emailDestinateur"):
+            logging.error("Champ 'emailDestinateur' vide ou null — rejeté avant tentative d'envoi")
             return
 
         qr_token        = data["qrCodeToken"]
@@ -117,6 +123,10 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
             logging.error(f"Champs manquants (multi-billets): {missing_multi}")
             return
 
+        if not data.get("userEmail"):
+            logging.error("Champ 'userEmail' vide ou null — rejeté avant tentative d'envoi")
+            return
+
         qr_tokens = data["ListQrCodeToken"]
         qr_codes  = data["ListQrCode"]
         if not qr_tokens or not qr_codes or len(qr_tokens) != len(qr_codes):
@@ -136,6 +146,8 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
         event_image_url  = data.get("eventImageUrl")
         company_name     = data.get("companyName", "N/A")
         user_role        = data.get("userRole", "Participant")
+        # bandeau RJP 2026 si template_type=True (legacy, même mécanisme que le billet classique)
+        template_type    = bool(data.get("template_type", False))
 
         logging.info(f"Multi-billets ({len(qr_tokens)}) pour {user_email} - {event_title}")
 
@@ -163,6 +175,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
                 event_title, event_start, event_location,
                 qr_base64_list, qr_tokens, registration_id,
                 event_image_url=event_image_url,
+                template_type=template_type,
             )
         except Exception as e:
             logging.error(f"Échec traitement multi-billets: {e}")
@@ -179,10 +192,15 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
         logging.error(f"Champs manquants: {missing_classic}")
         return
 
+    if not data.get("userEmail"):
+        logging.error("Champ 'userEmail' vide ou null — rejeté avant tentative d'envoi")
+        return
+
     registration_id  = data["registrationId"]
     user_id          = data.get("userId")  # facultatif, peut être null
     event_image_url  = data.get("eventImageUrl")  # facultatif, peut être null
-    template_type    = bool(data.get("template_type", False))  # bandeau RJP 2026 si True
+    # bandeau RJP 2026 si type dédié _J12, ou legacy template_type=True
+    template_type    = data["type"].endswith("_J12") or bool(data.get("template_type", False))
     user_email       = data["userEmail"]
     user_first_name = data["userFirstName"]
     user_last_name  = data["userLastName"]
@@ -207,7 +225,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
         qr_buffer.seek(0)
 
         # ── EVENT_REGISTRATION_CONFIRMED : génère le badge ZPL ───
-        if data["type"] == "EVENT_REGISTRATION_CONFIRMED":
+        if data["type"] in ("EVENT_REGISTRATION_CONFIRMED", "EVENT_REGISTRATION_CONFIRMED_J12"):
             logging.info("Premier envoi → Génération badge ZPL")
             generate_and_upload_badge(
                 qr_token=qr_token,
@@ -217,8 +235,8 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
                 user_role=user_role,
             )
 
-        # ── RESEND_REGISTRATION_CONFIRMED : skip badge, email seul
-        elif data["type"] == "RESEND_REGISTRATION_CONFIRMED":
+        # ── RESEND_REGISTRATION_CONFIRMED(_J12) : skip badge, email seul
+        elif data["type"] in ("RESEND_REGISTRATION_CONFIRMED", "RESEND_REGISTRATION_CONFIRMED_J12"):
             logging.info("Renvoi détecté → Skip génération badge")
 
         # ── Envoi email (commun aux deux types classiques) ────────
