@@ -586,6 +586,73 @@ def send_activation_link_organizer(
     logging.info(f"Email organisateur envoyé à {email}")
 
 
+def send_event_voucher(
+    email: str,
+    first_name: str,
+    last_name: str,
+    event_title: str,
+    voucher_code: str,
+) -> None:
+    """Envoie un voucher (code d'accès gratuit, montant ramené à 0) pour un événement précis."""
+    safe_first_name = html.escape(first_name or "")
+    safe_last_name = html.escape(last_name or "")
+    safe_event_title = html.escape(event_title or "")
+    safe_voucher_code = html.escape(voucher_code or "")
+
+    rows = (
+        _hero(
+            title="Votre voucher est prêt",
+            subtitle=f"Accès offert pour {safe_event_title}",
+            email_type_label="Voucher événement",
+        )
+        + _body_open(
+            greeting=f"Bonjour {safe_first_name} {safe_last_name},",
+            intro=(
+                f"Nous avons le plaisir de vous offrir un accès gratuit à "
+                f"<strong>{safe_event_title}</strong> sur la plateforme "
+                f"<strong>Athena Event</strong>. Voici votre voucher :"
+            )
+        )
+        + _code_block(safe_voucher_code, label="Votre code voucher")
+        + _note(
+            "Saisissez ce code lors de votre inscription sur la plateforme "
+            "Athena Event — le montant sera automatiquement ramené à 0."
+        )
+        + _alert(
+            "<strong>Conservez cet email :</strong> votre code voucher vous sera "
+            "demandé lors de l'inscription. Ne le partagez pas si vous ne "
+            "souhaitez pas qu'il soit utilisé par quelqu'un d'autre.",
+            variant="warning"
+        )
+        + _body_close("Au plaisir de vous accueillir.<br>Cordialement,")
+    )
+
+    msg = _build_message(
+        subject=f"Votre voucher Athena Event — {event_title}",
+        to_addr=email,
+        text_content=(
+            f"Athena Event — Voucher\n\n"
+            f"Bonjour {first_name} {last_name},\n\n"
+            f"Nous avons le plaisir de vous offrir un accès gratuit à {event_title}.\n\n"
+            f"Votre code voucher : {voucher_code}\n\n"
+            "Saisissez ce code lors de votre inscription sur la plateforme "
+            "Athena Event — le montant sera automatiquement ramené à 0.\n\n"
+            "Conservez cet email : votre code voucher vous sera demandé lors de "
+            "l'inscription.\n\n"
+            "Cordialement,\nL'équipe Athena Event"
+        ),
+        html_content=_build_html(
+            rows,
+            preheader=f"Votre voucher pour {safe_event_title} : {safe_voucher_code}"
+        ),
+        reply_to=SMTP_USER,
+        message_id=f"<voucher-{voucher_code}@athena-event.com>",
+    )
+
+    _send_email(msg)
+    logging.info(f"Email voucher envoyé à {email} pour {event_title}")
+
+
 def send_request_otp(destinataire: str, otp: str, event_image_url: str = None) -> None:
     safe_otp = html.escape(otp or "")
     safe_event_image_url = html.escape(event_image_url, quote=True) if event_image_url else ""
