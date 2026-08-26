@@ -102,10 +102,7 @@ def process_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -
         required_fields = ["otp"]
 
     elif email_type == "EVENT_VOUCHER":
-        required_fields = [
-            "type", "email", "firstName", "lastName",
-            "eventTitle", "voucherCode",
-        ]
+        required_fields = ["type", "email", "voucherCode"]
         email_field = data.get("email", "")
         logging.info(f"Email voucher: '{email_field}'")
 
@@ -184,10 +181,4 @@ def process_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -
         send_request_otp(email_field, data["otp"], event_image_url=data.get("eventImageUrl"))
 
     elif email_type == "EVENT_VOUCHER":
-        send_event_voucher(
-            email_field,
-            data["firstName"],
-            data["lastName"],
-            data["eventTitle"],
-            data["voucherCode"],
-        )
+        send_event_voucher(email_field, data["voucherCode"])

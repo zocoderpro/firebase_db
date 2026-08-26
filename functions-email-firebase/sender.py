@@ -48,27 +48,36 @@ def _build_message(
     x_mailer: str = "Athena Event Platform",
     x_priority: str = None,
     extra_images: list = None,
+    attach_logo: bool = True,
+    from_name: str = "Athena Event",
 ) -> MIMEMultipart:
     """
     Construit un message MIME complet : related > (alternative > texte+html) + logo
-    (+ images additionnelles éventuelles). Le logo est systématiquement attaché en
-    CID — c'est ce qui garantit qu'il ne dépend plus jamais d'un serveur externe.
+    (+ images additionnelles éventuelles). Le logo est attaché en CID par défaut —
+    c'est ce qui garantit qu'il ne dépend plus jamais d'un serveur externe.
 
     extra_images : liste de tuples (cid, bytes, subtype) pour des images
-                   supplémentaires (ex: QR code) à attacher en plus du logo.
+                   supplémentaires (ex: QR code, bandeau RJP 2026) à attacher en
+                   plus du logo.
+    attach_logo  : False pour les templates ponctuels où le logo Athena n'apparaît
+                   pas dans le HTML (ex: bandeau RJP 2026 qui remplace le hero) —
+                   évite une pièce jointe cid:logo orpheline.
+    from_name    : nom affiché dans l'expéditeur (ex: "RJP via Athena Event" pour
+                   les templates co-brandés).
     """
     outer = MIMEMultipart('related')
     alt = MIMEMultipart('alternative')
     alt.attach(MIMEText(text_content, 'plain', 'utf-8'))
     alt.attach(MIMEText(html_content, 'html', 'utf-8'))
     outer.attach(alt)
-    outer.attach(_load_logo_image_part())
+    if attach_logo:
+        outer.attach(_load_logo_image_part())
 
     for cid, image_bytes, subtype in (extra_images or []):
         outer.attach(_build_image_part(cid, image_bytes, subtype))
 
     outer['Subject'] = subject
-    outer['From'] = f"Athena Event <{SMTP_USER}>"
+    outer['From'] = f"{from_name} <{SMTP_USER}>"
     outer['To'] = to_addr
     if reply_to:
         outer['Reply-To'] = reply_to

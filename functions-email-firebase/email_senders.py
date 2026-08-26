@@ -9,6 +9,7 @@
 
 import html
 import logging
+import os
 from datetime import datetime
 
 from config import APP_BASE_URL, SMTP_USER
@@ -25,8 +26,31 @@ from templates.components import (
     _code_block,
     _steps_card,
     _note,
+    _rjp2026_banner,
     _build_html,
 )
+
+# Bandeau RJP 2026 (template_type=True) — logo organisateur + 6 sponsors, tous en CID.
+_RJP2026_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets", "rjp2026")
+_RJP2026_IMAGES = [
+    ("rjp_jpm", "jpm.png"),
+    ("rjp_bni", "bni.png"),
+    ("rjp_pamf", "pamf.png"),
+    ("rjp_acep", "acep.png"),
+    ("rjp_soredim", "soredim.png"),
+    ("rjp_sobatra", "sobatra.png"),
+    ("rjp_orca", "orca.png"),
+]
+
+
+def _load_rjp2026_images() -> list:
+    """Charge les 7 images du bandeau RJP 2026 (logo JPM + 6 sponsors) en tuples
+    (cid, bytes, subtype) — passés à _build_message(extra_images=...)."""
+    images = []
+    for cid, filename in _RJP2026_IMAGES:
+        with open(os.path.join(_RJP2026_ASSET_DIR, filename), "rb") as f:
+            images.append((cid, f.read(), "png"))
+    return images
 
 
 # ──────────────────────────────────────────────────────────────
@@ -586,38 +610,33 @@ def send_activation_link_organizer(
     logging.info(f"Email organisateur envoyé à {email}")
 
 
-def send_event_voucher(
-    email: str,
-    first_name: str,
-    last_name: str,
-    event_title: str,
-    voucher_code: str,
-) -> None:
-    """Envoie un voucher (code d'accès gratuit, montant ramené à 0) pour un événement précis."""
-    safe_first_name = html.escape(first_name or "")
-    safe_last_name = html.escape(last_name or "")
-    safe_event_title = html.escape(event_title or "")
+# Voucher RJP 2026 — template figé, propre à cet événement (co-brandé JPM).
+_RJP2026_EVENT_TITLE = "Rentrée du Jeune Patronat 2026"
+_RJP2026_REDEEM_URL = "https://athena-event.com/inscription/rentre-du-jeune-patronat-2026"
+
+
+def send_event_voucher(email: str, voucher_code: str) -> None:
+    """Envoie un voucher (code d'accès gratuit, montant ramené à 0) pour la
+    Rentrée du Jeune Patronat 2026. Template ponctuel co-brandé JPM — événement,
+    bandeau et lien d'inscription sont fixes, pas transmis par le backend."""
     safe_voucher_code = html.escape(voucher_code or "")
 
     rows = (
-        _hero(
-            title="Votre voucher est prêt",
-            subtitle=f"Accès offert pour {safe_event_title}",
-            email_type_label="Voucher événement",
-        )
+        _rjp2026_banner()
         + _body_open(
-            greeting=f"Bonjour {safe_first_name} {safe_last_name},",
+            greeting="Bonjour,",
             intro=(
-                f"Nous avons le plaisir de vous offrir un accès gratuit à "
-                f"<strong>{safe_event_title}</strong> sur la plateforme "
-                f"<strong>Athena Event</strong>. Voici votre voucher :"
+                f"Nous avons le plaisir de vous offrir votre place pour la "
+                f"<strong>{_RJP2026_EVENT_TITLE}</strong>. Voici votre bon d'invitation :"
             )
         )
         + _code_block(safe_voucher_code, label="Votre code voucher")
         + _note(
-            "Saisissez ce code lors de votre inscription sur la plateforme "
-            "Athena Event — le montant sera automatiquement ramené à 0."
+            "Pour vous inscrire gratuitement, cliquez sur le bouton S'inscrire, "
+            "choisissez l'option &laquo;&nbsp;Code promo des membres JPM&nbsp;&raquo; "
+            "lors du paiement et saisissez votre code."
         )
+        + _cta_button(_RJP2026_REDEEM_URL, "S'inscrire")
         + _alert(
             "<strong>Conservez cet email :</strong> votre code voucher vous sera "
             "demandé lors de l'inscription. Ne le partagez pas si vous ne "
@@ -628,29 +647,35 @@ def send_event_voucher(
     )
 
     msg = _build_message(
-        subject=f"Votre voucher Athena Event — {event_title}",
+        subject=f"Votre voucher — {_RJP2026_EVENT_TITLE}",
         to_addr=email,
         text_content=(
-            f"Athena Event — Voucher\n\n"
-            f"Bonjour {first_name} {last_name},\n\n"
-            f"Nous avons le plaisir de vous offrir un accès gratuit à {event_title}.\n\n"
+            f"RJP via Athena Event — Voucher\n\n"
+            f"Bonjour,\n\n"
+            f"Nous avons le plaisir de vous offrir votre place pour la "
+            f"{_RJP2026_EVENT_TITLE}. Voici votre bon d'invitation.\n\n"
             f"Votre code voucher : {voucher_code}\n\n"
-            "Saisissez ce code lors de votre inscription sur la plateforme "
-            "Athena Event — le montant sera automatiquement ramené à 0.\n\n"
+            "Pour vous inscrire gratuitement, cliquez sur le lien ci-dessous, "
+            "choisissez l'option « Code promo des membres JPM » lors du paiement "
+            "et saisissez votre code.\n\n"
+            f"Inscription : {_RJP2026_REDEEM_URL}\n\n"
             "Conservez cet email : votre code voucher vous sera demandé lors de "
             "l'inscription.\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
         html_content=_build_html(
             rows,
-            preheader=f"Votre voucher pour {safe_event_title} : {safe_voucher_code}"
+            preheader=f"Votre voucher pour {_RJP2026_EVENT_TITLE} : {safe_voucher_code}"
         ),
         reply_to=SMTP_USER,
         message_id=f"<voucher-{voucher_code}@athena-event.com>",
+        extra_images=_load_rjp2026_images(),
+        attach_logo=False,
+        from_name="RJP via Athena Event",
     )
 
     _send_email(msg)
-    logging.info(f"Email voucher envoyé à {email} pour {event_title}")
+    logging.info(f"Email voucher RJP 2026 envoyé à {email}")
 
 
 def send_request_otp(destinataire: str, otp: str, event_image_url: str = None) -> None:

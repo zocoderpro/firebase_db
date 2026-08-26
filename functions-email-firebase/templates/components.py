@@ -143,6 +143,15 @@ def _note(content: str, margin: str = "0 0 4px 0") -> str:
     return render_fragment("note", MARGIN=margin, CONTENT=content)
 
 
+def _rjp2026_banner() -> str:
+    """
+    Bandeau organisateur/sponsors pour l'événement RJP 2026 — remplace _hero()
+    pour ce template ponctuel (template_type=True). Contenu 100% statique
+    (logo JPM + 6 logos sponsors, tous en CID cid:rjp_*).
+    """
+    return render_fragment("rjp2026_banner")
+
+
 def _footer() -> str:
     """
     Pied de page navy : devise, contacts, copyright — centrés.
