@@ -26,7 +26,10 @@ from templates.components import (
     _info_card,
     _info_row,
     _qr_block,
-    _rjp2026_banner,
+    _rjp2026_header,
+    _rjp2026_sponsors_footer,
+    _body_close_plain,
+    _body_reopen,
     _security_card,
     _note,
     _build_html,
@@ -34,7 +37,7 @@ from templates.components import (
 
 _LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "logo.jpeg")
 
-# Bandeau RJP 2026 (template_type=True) — logo organisateur + 6 sponsors, tous en CID.
+# Bandeau RJP 2026 (template_type=True) — logo organisateur + 12 sponsors, tous en CID.
 _RJP2026_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets", "rjp2026")
 _RJP2026_IMAGES = [
     ("rjp_jpm", "jpm.png"),
@@ -44,6 +47,12 @@ _RJP2026_IMAGES = [
     ("rjp_soredim", "soredim.png"),
     ("rjp_sobatra", "sobatra.png"),
     ("rjp_orca", "orca.png"),
+    ("rjp_bmoi", "bmoi.png"),
+    ("rjp_logia", "logia.jpg"),
+    ("rjp_total_energie", "total_energie.png"),
+    ("rjp_venture_capital", "venture_capital.jpg"),
+    ("rjp_wellcom", "wellcom.jpg"),
+    ("rjp_sanlam_allianz", "sanlam_allianz.png"),
 ]
 
 
@@ -58,12 +67,14 @@ def _load_logo_image_part() -> MIMEImage:
 
 
 def _load_rjp2026_image_parts() -> list:
-    """Charge les 7 images du bandeau RJP 2026 (logo JPM + 6 sponsors) pour
-    intégration CID — référencées par templates/fragments/rjp2026_banner.html."""
+    """Charge les images du bandeau RJP 2026 (logo JPM + sponsors) pour
+    intégration CID — référencées par templates/fragments/rjp2026_header.html
+    et rjp2026_sponsors_footer.html."""
     parts = []
     for cid, filename in _RJP2026_IMAGES:
+        subtype = "jpeg" if filename.lower().endswith((".jpg", ".jpeg")) else "png"
         with open(os.path.join(_RJP2026_ASSET_DIR, filename), "rb") as f:
-            image = MIMEImage(f.read(), _subtype="png")
+            image = MIMEImage(f.read(), _subtype=subtype)
         image.add_header("Content-ID", f"<{cid}>")
         image.add_header("Content-Disposition", "inline", filename=filename)
         parts.append(image)
@@ -243,10 +254,12 @@ def send_ticket_email_with_qr(
     template_type: bool = False,
 ):
     """
-    template_type : True active le bandeau organisateur/sponsors RJP 2026
-                     (templates/fragments/rjp2026_banner.html) à la place du
-                     hero Athena Event standard — template ponctuel pour cet
-                     événement. False (défaut) = hero Athena standard, inchangé.
+    template_type : True active l'en-tête organisateur RJP 2026
+                     (templates/fragments/rjp2026_header.html) à la place du
+                     hero Athena Event standard, et ajoute le bloc sponsors
+                     (rjp2026_sponsors_footer.html) en bas de l'email —
+                     template ponctuel pour cet événement. False (défaut) =
+                     hero Athena standard, inchangé.
     """
     SMTP_HOST     = os.environ.get("SMTP_HOST", "smtp.zeptomail.com")
     SMTP_PORT     = int(os.environ.get("SMTP_PORT", "587"))
@@ -286,7 +299,7 @@ def send_ticket_email_with_qr(
 
     # ── Assemblage des blocs visuels ──
     header_block = (
-        _rjp2026_banner() if template_type else
+        _rjp2026_header() if template_type else
         _hero(
             title="Confirmation d'inscription",
             subtitle=f"Votre billet pour {safe_event_title}",
@@ -307,6 +320,10 @@ def send_ticket_email_with_qr(
         + _info_card(info_rows, label="Détails de votre inscription")
         + _qr_block(safe_qr_token)
         + _security_card(security_items)
+        + (
+            _body_close_plain() + _rjp2026_sponsors_footer() + _body_reopen()
+            if template_type else ""
+        )
         + _note(
             "Nous vous remercions pour votre confiance et restons &#224; votre disposition "
             "pour toute question."
@@ -475,7 +492,7 @@ def send_ticket_email_multiticket(
 
     # ── Assemblage des blocs visuels ──
     header_block = (
-        _rjp2026_banner() if template_type else
+        _rjp2026_header() if template_type else
         _hero(
             title="Confirmation d'inscription",
             subtitle=f"Vos {ticket_count} billets pour {safe_event_title}",
@@ -498,6 +515,10 @@ def send_ticket_email_multiticket(
         + _info_card(info_rows, label="Détails de l'inscription")
         + qr_blocks
         + _security_card(security_items)
+        + (
+            _body_close_plain() + _rjp2026_sponsors_footer() + _body_reopen()
+            if template_type else ""
+        )
         + _note(
             "Nous vous remercions pour votre confiance et restons &#224; votre disposition "
             "pour toute question."

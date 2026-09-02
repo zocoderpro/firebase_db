@@ -13,6 +13,16 @@
       "source": "functions-brochure-firebase",
       "codebase": "brochure-service",
       "runtime": "python312"
+    },
+    {
+      "source": "functions-sms-mapi-firebase",
+      "codebase": "sms-mapi-test-service",
+      "runtime": "python312"
+    },
+    {
+      "source": "functions-befiana-sms-firebase",
+      "codebase": "sms-befiana-test-service",
+      "runtime": "python312"
     }
   ],
   "emulators": {

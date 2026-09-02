@@ -26,11 +26,14 @@ from templates.components import (
     _code_block,
     _steps_card,
     _note,
-    _rjp2026_banner,
+    _rjp2026_header,
+    _rjp2026_sponsors_footer,
+    _body_close_plain,
+    _body_reopen,
     _build_html,
 )
 
-# Bandeau RJP 2026 (template_type=True) — logo organisateur + 6 sponsors, tous en CID.
+# Bandeau RJP 2026 (template_type=True) — logo organisateur + 12 sponsors, tous en CID.
 _RJP2026_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets", "rjp2026")
 _RJP2026_IMAGES = [
     ("rjp_jpm", "jpm.png"),
@@ -40,16 +43,23 @@ _RJP2026_IMAGES = [
     ("rjp_soredim", "soredim.png"),
     ("rjp_sobatra", "sobatra.png"),
     ("rjp_orca", "orca.png"),
+    ("rjp_bmoi", "bmoi.png"),
+    ("rjp_logia", "logia.jpg"),
+    ("rjp_total_energie", "total_energie.png"),
+    ("rjp_venture_capital", "venture_capital.jpg"),
+    ("rjp_wellcom", "wellcom.jpg"),
+    ("rjp_sanlam_allianz", "sanlam_allianz.png"),
 ]
 
 
 def _load_rjp2026_images() -> list:
-    """Charge les 7 images du bandeau RJP 2026 (logo JPM + 6 sponsors) en tuples
+    """Charge les images du bandeau RJP 2026 (logo JPM + sponsors) en tuples
     (cid, bytes, subtype) — passés à _build_message(extra_images=...)."""
     images = []
     for cid, filename in _RJP2026_IMAGES:
+        subtype = "jpeg" if filename.lower().endswith((".jpg", ".jpeg")) else "png"
         with open(os.path.join(_RJP2026_ASSET_DIR, filename), "rb") as f:
-            images.append((cid, f.read(), "png"))
+            images.append((cid, f.read(), subtype))
     return images
 
 
@@ -622,7 +632,7 @@ def send_event_voucher(email: str, voucher_code: str) -> None:
     safe_voucher_code = html.escape(voucher_code or "")
 
     rows = (
-        _rjp2026_banner()
+        _rjp2026_header()
         + _body_open(
             greeting="Bonjour,",
             intro=(
@@ -643,6 +653,9 @@ def send_event_voucher(email: str, voucher_code: str) -> None:
             "souhaitez pas qu'il soit utilisé par quelqu'un d'autre.",
             variant="warning"
         )
+        + _body_close_plain()
+        + _rjp2026_sponsors_footer()
+        + _body_reopen()
         + _body_close("Au plaisir de vous accueillir.<br>Cordialement,")
     )
 

@@ -65,6 +65,21 @@ def _body_close(sign_off: str = "Cordialement,") -> str:
     return render_fragment("body_close", SIGN_OFF=sign_off)
 
 
+def _body_close_plain() -> str:
+    """Ferme la zone de contenu SANS filet doré ni signature — utilisé quand un
+    bloc pleine largeur (ex: _rjp2026_sponsors_footer()) doit s'intercaler
+    avant la signature finale. À utiliser avec _body_reopen()."""
+    return render_fragment("body_close_plain")
+
+
+def _body_reopen() -> str:
+    """Rouvre une zone de contenu au même padding que _body_open(), sans
+    salutation ni intro — pour reprendre le texte indenté (ex: note de
+    remerciement + signature) après un bloc pleine largeur inséré via
+    _body_close_plain()."""
+    return render_fragment("body_reopen")
+
+
 def _info_card(rows_html: str, label: str = "DÉTAILS") -> str:
     """
     Carte blanche à liseré doré (même langage visuel que les cartes
@@ -143,13 +158,22 @@ def _note(content: str, margin: str = "0 0 4px 0") -> str:
     return render_fragment("note", MARGIN=margin, CONTENT=content)
 
 
-def _rjp2026_banner() -> str:
+def _rjp2026_header() -> str:
     """
-    Bandeau organisateur/sponsors pour l'événement RJP 2026 — remplace _hero()
-    pour ce template ponctuel (template_type=True). Contenu 100% statique
-    (logo JPM + 6 logos sponsors, tous en CID cid:rjp_*).
+    En-tête organisateur RJP 2026 (dégradé + logo JPM) — remplace _hero() pour
+    ce template ponctuel. Contenu 100% statique.
     """
-    return render_fragment("rjp2026_banner")
+    return render_fragment("rjp2026_header")
+
+
+def _rjp2026_sponsors_footer() -> str:
+    """
+    Bloc sponsors/partenaires RJP 2026 (4 catégories : Or, Argent, RSE &
+    Jeunesse, Amis du JPM) — placé en bas de l'email, après le corps du
+    message, à la demande de l'organisateur (JPM). Contenu 100% statique,
+    tous les logos en CID cid:rjp_*.
+    """
+    return render_fragment("rjp2026_sponsors_footer")
 
 
 def _footer() -> str:
