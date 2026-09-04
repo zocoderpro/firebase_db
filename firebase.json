@@ -23,6 +23,11 @@
       "source": "functions-befiana-sms-firebase",
       "codebase": "sms-befiana-test-service",
       "runtime": "python312"
+    },
+    {
+      "source": "functions-newsletter-jpm-firebase",
+      "codebase": "newsletter-jpm-service",
+      "runtime": "python312"
     }
   ],
   "emulators": {

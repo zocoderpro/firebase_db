@@ -169,14 +169,18 @@ def render_template(template_html, data):
 
 def build_requesters_block(requesters):
     """Construit la liste élégante des demandes de contact (une carte par demandeur).
-    Chaque demandeur : {"requesterFirstName", "requesterLastName", "requesterEmail", "note"}.
-    La note est omise si vide."""
+    Chaque demandeur : {"requesterFirstName", "requesterLastName", "requesterEmail",
+    "requesterTel", "note"}. Le téléphone a sa propre ligne (comme l'email, pas
+    fondu dans la ligne Profession/Entreprise) ; la ligne est omise proprement
+    si le numéro est absent ou vide. La note est omise si vide."""
     import html as _html
     cards = []
     for requester in requesters:
         first = _html.escape((requester.get("requesterFirstName") or "").strip())
         last = _html.escape((requester.get("requesterLastName") or "").strip())
         email = _html.escape((requester.get("requesterEmail") or "").strip())
+        tel = _html.escape((requester.get("requesterTel") or "").strip())
+        tel_href = _html.escape((requester.get("requesterTel") or "").strip(), quote=True)
         profession = _html.escape((requester.get("requesterProfession") or "").strip())
         company = _html.escape((requester.get("requesterCompany") or "").strip())
         acceptation_link = _html.escape((requester.get("acceptationLink") or "").strip(), quote=True)
@@ -224,6 +228,11 @@ def build_requesters_block(requesters):
             f'{role_html}'
             '<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;padding-top:3px;">'
             f'<a href="mailto:{email}" style="color:#a3823c;text-decoration:none;">{email}</a></div>'
+            + (
+                '<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;padding-top:2px;">'
+                f'<a href="tel:{tel_href}" style="color:#5a6577;text-decoration:none;">&#9742;&nbsp;{tel}</a></div>'
+                if tel else ''
+            ) +
             '</td>'
             f'{button_html}'
             '</tr></table>'
@@ -235,13 +244,18 @@ def build_requesters_block(requesters):
 
 def build_accepter_block(data):
     """Construit la carte de la personne ayant accepté la demande de contact
-    (ACCEPT_CONTACT_REQUEST). Champs : accepterFirstName, accepterLastName,
-    accepterEmail, accepterNote ; destNote rappelle le message d'origine.
-    Les notes sont omises si vides."""
+    (ACCEPT_CONTACT_REQUEST) — envoyée au demandeur d'origine, échange de
+    contact mutuel : ses coordonnées, téléphone inclus, lui sont donc
+    montrées. Champs : accepterFirstName, accepterLastName, accepterEmail,
+    accepterTel, accepterNote ; destNote rappelle le message d'origine. Le
+    téléphone a sa propre ligne (comme l'email), omise proprement si absente
+    ou vide. Les notes sont omises si vides."""
     import html as _html
     first = _html.escape((data.get("accepterFirstName") or "").strip())
     last = _html.escape((data.get("accepterLastName") or "").strip())
     email = _html.escape((data.get("accepterEmail") or "").strip())
+    tel = _html.escape((data.get("accepterTel") or "").strip())
+    tel_href = _html.escape((data.get("accepterTel") or "").strip(), quote=True)
     accepter_note = _html.escape((data.get("accepterNote") or "").strip())
     dest_note = _html.escape((data.get("destNote") or "").strip())
     name = " ".join(part for part in (first, last) if part) or email
@@ -272,6 +286,11 @@ def build_accepter_block(data):
         f'line-height:24px;color:#163057;">{name}</div>'
         '<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;padding-top:3px;">'
         f'<a href="mailto:{email}" style="color:#a3823c;text-decoration:none;">{email}</a></div>'
+        + (
+            '<div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;padding-top:2px;">'
+            f'<a href="tel:{tel_href}" style="color:#5a6577;text-decoration:none;">&#9742;&nbsp;{tel}</a></div>'
+            if tel else ''
+        ) +
         '</td>'
         f'{badge_html}'
         '</tr></table>'
