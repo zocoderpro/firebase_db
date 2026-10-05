@@ -1,0 +1,85 @@
+
+    <!--[if mso | IE]>
+    <tr><td style="background-color:#163057;padding:32px 36px 30px 36px;">
+    <![endif]-->
+    <!--[if !mso]><!-->
+    <tr>
+      <td class="hero-td"
+          style="background-color:#163057;
+                 background-image:linear-gradient(rgba(22,48,87,0.78),rgba(18,39,72,0.86)),url('{{BG_URL}}');
+                 background-size:cover;background-position:center center;
+                 background-repeat:no-repeat;
+                 padding:32px 36px 30px 36px;">
+    <!--<![endif]-->
+
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+
+          <!-- Ligne 1 : Logo + marque + badge type email -->
+          <tr>
+            <td class="logo-brand-td" valign="middle" style="vertical-align:middle;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td valign="middle" style="padding-right:12px;vertical-align:middle;">
+                    <img class="logo-img" src="{{LOGO_URL}}" alt="Athena Event"
+                         width="40" height="40"
+                         style="width:40px;height:40px;border-radius:10px;
+                                border:1px solid #c7a253;display:block;" />
+                  </td>
+                  <td valign="middle" style="vertical-align:middle;">
+                    <div class="brand-name"
+                         style="font-family:Georgia,'Times New Roman',serif;
+                                font-size:19px;color:#ffffff;
+                                line-height:1.2;margin:0;letter-spacing:.5px;">
+                      Athena Event
+                    </div>
+                    <div class="brand-sub"
+                         style="font-family:Arial,sans-serif;font-size:9px;
+                                color:#9fb0c9;letter-spacing:2.5px;
+                                text-transform:uppercase;margin-top:3px;">
+                      by Clearmind Analytics
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            {{BADGE_COL}}
+          </tr>
+
+          <!-- Spacer -->
+          <tr>
+            <td colspan="{{COLS}}" style="height:24px;font-size:1px;line-height:1px;">&nbsp;</td>
+          </tr>
+
+          <!-- Ligne 2 : Filet doré + titre + sous-titre -->
+          <tr>
+            <td colspan="{{COLS}}">
+              <div style="width:44px;height:2px;background-color:#c7a253;
+                          margin-bottom:14px;font-size:0;line-height:2px;">&nbsp;</div>
+              <div class="hero-title"
+                   style="font-family:Georgia,'Times New Roman',serif;
+                          font-size:25px;color:#ffffff;
+                          line-height:31px;margin:0;">
+                {{TITLE}}
+              </div>
+              <div class="hero-sub"
+                   style="font-family:Arial,sans-serif;font-size:13px;
+                          color:#d7deea;margin-top:8px;letter-spacing:.3px;
+                          line-height:1.5;">
+                {{SUBTITLE}}
+              </div>
+            </td>
+          </tr>
+
+        </table>
+
+    <!--[if mso | IE]></td></tr><![endif]-->
+    <!--[if !mso]><!-->
+      </td>
+    </tr>
+    <!--<![endif]-->
+
+    <!-- Filet doré accent sous le hero -->
+    <tr>
+      <td style="height:3px;font-size:3px;line-height:3px;
+                 background-color:#c7a253;">&nbsp;</td>
+    </tr>
