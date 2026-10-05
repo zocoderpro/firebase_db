@@ -1,5 +1,5 @@
 {
- "functions": [
+  "functions": [
     {
       "source": "functions-email-firebase",
       "codebase": "email-service",
@@ -9,7 +9,8 @@
       "source": "functions-ticket-firebase",
       "codebase": "ticket-service",
       "runtime": "python312"
-    },  {
+    },
+    {
       "source": "functions-brochure-firebase",
       "codebase": "brochure-service",
       "runtime": "python312"
@@ -28,6 +29,12 @@
       "source": "functions-newsletter-jpm-firebase",
       "codebase": "newsletter-jpm-service",
       "runtime": "python312"
+    },
+    {
+      "source": "functions-rjp-invitation-firebase",
+      "codebase": "rjp-invitation-service",
+      "runtime": "python312",
+      "timeoutSeconds": 540
     }
   ],
   "emulators": {
@@ -46,7 +53,7 @@
       "port": 8085,
       "host": "0.0.0.0"
     },
-    
+
     "ui": {
       "enabled": true,
       "port": 4000,
