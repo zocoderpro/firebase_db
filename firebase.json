@@ -30,8 +30,7 @@
       "codebase": "newsletter-jpm-service",
       "runtime": "python312"
     },
-    {
-      "source": "functions-rjp-invitation-firebase",
+    {"source": "functions-rjp-invitation-firebase",
       "codebase": "rjp-invitation-service",
       "runtime": "python312",
       "timeoutSeconds": 540
