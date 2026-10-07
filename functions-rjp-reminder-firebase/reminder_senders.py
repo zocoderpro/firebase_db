@@ -38,9 +38,7 @@ def _load_rjp_jpm_image_bytes():
 
 def send_rjp_reminder(
     email: str,
-    last_name: str,
     reminder_type: str = "BOTH_DAYS",
-    genre: str = "H",
 ):
     """Envoie un email de rappel RJP.
 
@@ -48,18 +46,8 @@ def send_rjp_reminder(
         "BOTH_DAYS" → rappel pour les 2 jours (J1 + J2)
         "DAY2"      → rappel pour la journée 2 uniquement
     """
-    safe_last_name = html.escape(last_name or "")
-
-    genre = (genre or "").strip().upper()
-    if genre == "F":
-        salutation = f"Madame {safe_last_name}"
-        titre_politesse = "Madame"
-    elif genre == "H":
-        salutation = f"Monsieur {safe_last_name}"
-        titre_politesse = "Monsieur"
-    else:
-        salutation = f"Madame/Monsieur {safe_last_name}"
-        titre_politesse = "Madame/Monsieur"
+    salutation = "Bonjour,"
+    titre_politesse = "Madame/Monsieur"
 
     # Contenu selon le type de rappel
     if reminder_type == "DAY2":

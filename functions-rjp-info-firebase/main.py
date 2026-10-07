@@ -3,7 +3,7 @@ import logging
 from firebase_admin import initialize_app
 from firebase_functions import pubsub_fn
 
-from reminder_senders import send_rjp_reminder
+from info_senders import send_rjp_info
 
 # Initialiser Firebase Admin
 initialize_app()
@@ -20,10 +20,10 @@ initialize_app()
 # ╚══════════════════════════════════════════════════════════════╝
 
 
-@pubsub_fn.on_message_published(topic="prod-rjp-reminder")
-def process_reminder(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -> None:
+@pubsub_fn.on_message_published(topic="prod-rjp-info")
+def process_info(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -> None:
     logging.info("=" * 80)
-    logging.info("MESSAGE REÇU SUR PUB/SUB - prod-rjp-reminder")
+    logging.info("MESSAGE REÇU SUR PUB/SUB - prod-rjp-info")
     logging.info("=" * 80)
 
     try:
@@ -45,11 +45,7 @@ def process_reminder(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
     logging.info(f"Type détecté: {email_type}")
 
     # ── Validation dynamique selon le type ──
-    if email_type == "RJP_REMINDER_BOTH_DAYS":
-        required_fields = ["type", "email"]
-        email_field = data.get("email", "")
-
-    elif email_type == "RJP_REMINDER_DAY2":
+    if email_type == "RJP_INFO":
         required_fields = ["type", "email"]
         email_field = data.get("email", "")
 
@@ -63,14 +59,7 @@ def process_reminder(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]
         return
 
     # ── Dispatch selon le type ──
-    if email_type == "RJP_REMINDER_BOTH_DAYS":
-        send_rjp_reminder(
+    if email_type == "RJP_INFO":
+        send_rjp_info(
             email=email_field,
-            reminder_type="BOTH_DAYS",
-        )
-
-    elif email_type == "RJP_REMINDER_DAY2":
-        send_rjp_reminder(
-            email=email_field,
-            reminder_type="DAY2",
         )
