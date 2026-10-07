@@ -61,6 +61,7 @@ curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/<topic>:pu
 | `sms-befiana-test-service`  | `functions-befiana-sms-firebase`| `prod-sms-befiana-notifications`|
 | `newsletter-jpm-service`    | `functions-newsletter-jpm-firebase`| `prod-newsletter-jpm`        |
 | `rjp-j1-service`            | `functions-rjp-j1-firebase`    | `prod-rjp-j1`                    |
+| `rjp-email-confirmation-service` | `functions-rjp-email-confirmation` | `prod-rjp-email-confirmation` |
 
 `functions-ticket-firebase2/` est une **ancienne version legacy** (non déclarée
 dans `firebase.json`) — ne pas la modifier.
@@ -105,3 +106,10 @@ dans `firebase.json`) — ne pas la modifier.
   `functions-ticket-firebase/README.md`.
 - Chaque service a son propre `requirements.txt` ; les versions diffèrent
   légèrement entre dossiers.
+- **Collision de noms `main.py`** : si le handler Pub/Sub et la fonction d'envoi
+  importée de `email_sender.py` portent le même nom, la définition du handler
+  écrase l'import et l'appel se récurse (`TypeError: got an unexpected keyword
+  argument`). Importer sous alias : `from email_sender import send_x as _send_x`.
+- Un nouveau codebase doit avoir **son propre `venv/` créé dans son dossier**
+  (ne pas copier celui d'un autre service : `pyvenv.cfg` garde le chemin
+  `executable` de l'original).

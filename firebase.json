@@ -1,37 +1,31 @@
 {
   "functions": [
     {
-      "source": "functions-email-firebase",
-      "codebase": "email-service",
-      "runtime": "python312"
-    },
-    {
-      "source": "functions-ticket-firebase",
-      "codebase": "ticket-service",
-      "runtime": "python312"
-    },
-    {
-      "source": "functions-brochure-firebase",
-      "codebase": "brochure-service",
-      "runtime": "python312"
-    },
-    {
-      "source": "functions-sms-mapi-firebase",
-      "codebase": "sms-mapi-test-service",
-      "runtime": "python312"
-    },
-    {
-      "source": "functions-befiana-sms-firebase",
-      "codebase": "sms-befiana-test-service",
-      "runtime": "python312"
-    },
-    {
       "source": "functions-newsletter-jpm-firebase",
       "codebase": "newsletter-jpm-service",
       "runtime": "python312"
     },
-    {"source": "functions-rjp-invitation-firebase",
+    {
+      "source": "functions-rjp-invitation-firebase",
       "codebase": "rjp-invitation-service",
+      "runtime": "python312",
+      "timeoutSeconds": 540
+    },
+    {
+      "source": "functions-rjp-j1-firebase",
+      "codebase": "rjp-j1-service",
+      "runtime": "python312",
+      "timeoutSeconds": 540
+    },
+    {
+      "source": "functions-rjp-email-confirmation",
+      "codebase": "rjp-email-confirmation-service",
+      "runtime": "python312",
+      "timeoutSeconds": 540
+    },
+    {
+      "source": "functions-rjp-confirmation-j2",
+      "codebase": "rjp-confirmation-j2-service",
       "runtime": "python312",
       "timeoutSeconds": 540
     }
@@ -52,7 +46,6 @@
       "port": 8085,
       "host": "0.0.0.0"
     },
-
     "ui": {
       "enabled": true,
       "port": 4000,

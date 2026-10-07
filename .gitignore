@@ -90,3 +90,4 @@ functions-email-firebase/__pycache__/
 functions-ticket-firebase/__pycache__/
 functions-ticket-firebase/templates/__pycache__/
 functions-ticket-firebase2/__pycache__/
+functions-rjp-confirmation-j2/.env.local
