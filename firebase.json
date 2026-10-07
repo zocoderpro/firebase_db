@@ -34,6 +34,11 @@
       "codebase": "rjp-invitation-service",
       "runtime": "python312",
       "timeoutSeconds": 540
+    },
+     {"source": "functions-rjp-j1-firebase",
+      "codebase": "rjp-j1-service",
+      "runtime": "python312",
+      "timeoutSeconds": 540
     }
   ],
   "emulators": {
