@@ -37,7 +37,7 @@
 ```bash
 curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-rjp-invitation:publish" \
 -H "Content-Type: application/json" \
--d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"RJP_INVITATION","email":"test@gmail.com","firstName":"Jean","lastName":"Rakoto","qrToken":"qrt_123","fonction":"Président","entite":"JPM","genre":"H"}' | base64 -w0)\"}]}"
+-d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"RJP_INVITATION","email":"Jimmyraf.tpmeuble@gmail.com","firstName":"Jimmy","lastName":"Rafaralahy","qrToken":"757623","fonction":"TP MEUBLE","entite":"","genre":"H"}' | base64 -w0)\"}]}"
 ```
 
 ### RJP_INVITATION_BATCH
