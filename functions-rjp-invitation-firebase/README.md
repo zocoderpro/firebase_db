@@ -37,14 +37,14 @@
 ```bash
 curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-rjp-invitation:publish" \
 -H "Content-Type: application/json" \
--d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"RJP_INVITATION","email":"Jimmyraf.tpmeuble@gmail.com","firstName":"Jimmy","lastName":"Rafaralahy","qrToken":"757623","fonction":"TP MEUBLE","entite":"","genre":"H"}' | base64 -w0)\"}]}"
+-d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"RJP_INVITATION","email":"fanilo.rafaralahimboa@edbm.mg","firstName":"Fanilo","lastName":"RAFARALAHIMBOA","qrToken":"679624","fonction":"","entite":"EDBM","genre":""}' | base64 -w0)\"}]}"
 ```
 
 ### RJP_INVITATION_BATCH
 ```bash
 curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-rjp-invitation:publish" \
 -H "Content-Type: application/json" \
--d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"RJP_INVITATION_BATCH","email":"groupement.pme@gmail.com","firstName":"Zo Nantenaina","lastName":"RANAIVOSON","qrTokens":["774118","447271","222451","534162","200291"],"qrCodes":["774118","447271","222451","534162","200291"],"fonction":"Présidente","entite":"GPMES","genre":"F","maps_link":"https://bit.ly/3VcDPvW"}' | base64 -w0)\"}]}"
+-d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"RJP_INVITATION_BATCH","email":"t.randriamanantsoa@miarakap.com","firstName":"Tatiana","lastName":"RANDRIAMANANTSOA","qrTokens":["322053","548075","633747","542044","837360", "169942", "822378"],"qrCodes":["322053","548075","633747","542044","837360", "169942", "822378"],"fonction":"","entite":"Communication & PR Manager","genre":"F","maps_link":"https://bit.ly/3VcDPvW"}' | base64 -w0)\"}]}"
 ```
 
 ## Fichiers principaux
