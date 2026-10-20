@@ -2,15 +2,15 @@ import os
 
 # ──────────────────────────────────────────────────────────────
 # CONFIG VISUELLE
-# Les deux seules valeurs à changer quand tu as tes vrais assets
 # ──────────────────────────────────────────────────────────────
-
-# Image de fond du hero — recommandé : 1200×400px, hébergée sur GCS/Firebase
-HERO_IMAGE_URL = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80&auto=format&fit=crop"
 
 # Logo Athena Event — intégré en CID (assets/logo.jpeg), plus de dépendance à une
 # URL externe. Voir sender.py::_load_logo_image_part().
 LOGO_URL = "cid:logo"
+
+# Marque affichée dans le bandeau d'en-tête de templates/email.html
+BRAND_NAME   = "Athena Event"
+BRAND_KICKER = "by Clearmind Analytics"
 
 
 # ──────────────────────────────────────────────────────────────

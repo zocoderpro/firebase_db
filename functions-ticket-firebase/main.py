@@ -4,7 +4,7 @@ import logging
 from io import BytesIO
 
 import qrcode
-from firebase_admin import initialize_app
+from firebase_admin import initialize_app, get_app
 from firebase_functions import pubsub_fn
 
 from storage import storage_client  # noqa: F401 — déclenche la config de l'émulateur
@@ -12,7 +12,12 @@ from pdf_generator import generate_and_upload_badge
 from email_sender import send_ticket_email_with_qr, send_ticket_email_invited, send_ticket_email_multiticket
 
 # Initialiser Firebase Admin
-initialize_app()
+# Initialiser Firebase Admin une seule fois (éviter l'erreur "already exists" dans l'émulateur)
+try:
+    get_app()
+except ValueError:
+    initialize_app()
+
 
 
 # ╔══════════════════════════════════════════════════════════════╗
@@ -52,9 +57,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
     # ✅ ACCEPTER LES TYPES CONNUS
     ACCEPTED_TYPES = [
         "EVENT_REGISTRATION_CONFIRMED",
-        "EVENT_REGISTRATION_CONFIRMED_J12",
         "RESEND_REGISTRATION_CONFIRMED",
-        "RESEND_REGISTRATION_CONFIRMED_J12",
         "RESEND_REGISTRATION_CONFIRMED_INVITED",
         "EVENT_REGISTRATION_CONFIRMED_MULTITICKET",
     ]
@@ -62,7 +65,34 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
         logging.warning(f"Type incorrect: {data['type']}")
         return
 
-    # ── Dispatch : billet invité ──────────────────────────────────
+    # ── Normalisation des noms de champs (alias) ───────────────────
+    # Accepter les noms courts préférés + noms complets officiels
+    field_aliases = {
+        "userEmail": ["email"],
+        "userFirstName": ["firstName"],
+        "userLastName": ["lastName"],
+        "registrationId": ["eventId"],
+        "qrCodeToken": ["qrToken"],
+    }
+    for canonical, aliases in field_aliases.items():
+        if canonical not in data:
+            for alias in aliases:
+                if alias in data:
+                    data[canonical] = data[alias]
+                    break
+
+    # ── Valeurs par défaut pour champs optionnels ──────────────────
+    data.setdefault("eventTitle", "Événement")
+    data.setdefault("eventStartDate", "Date à confirmer")
+    data.setdefault("eventLocation", "Lieu à confirmer")
+    data.setdefault("qrCode", data.get("qrCodeToken", "QRCODE"))
+
+    # ── Validation minimale ───────────────────────────────────────
+    required_minimal = ["registrationId", "userEmail", "userFirstName", "userLastName", "qrCodeToken"]
+    missing = [f for f in required_minimal if f not in data]
+    if missing:
+        logging.error(f"Champs manquants: {missing}")
+        return
     if data["type"] == "RESEND_REGISTRATION_CONFIRMED_INVITED":
         invited_required = [
             "registrationId", "emailDestinateur",
@@ -146,8 +176,6 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
         event_image_url  = data.get("eventImageUrl")
         company_name     = data.get("companyName", "N/A")
         user_role        = data.get("userRole", "Participant")
-        # bandeau RJP 2026 si template_type=True (legacy, même mécanisme que le billet classique)
-        template_type    = bool(data.get("template_type", False))
 
         logging.info(f"Multi-billets ({len(qr_tokens)}) pour {user_email} - {event_title}")
 
@@ -175,7 +203,6 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
                 event_title, event_start, event_location,
                 qr_base64_list, qr_tokens, registration_id,
                 event_image_url=event_image_url,
-                template_type=template_type,
             )
         except Exception as e:
             logging.error(f"Échec traitement multi-billets: {e}")
@@ -199,8 +226,6 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
     registration_id  = data["registrationId"]
     user_id          = data.get("userId")  # facultatif, peut être null
     event_image_url  = data.get("eventImageUrl")  # facultatif, peut être null
-    # bandeau RJP 2026 si type dédié _J12, ou legacy template_type=True
-    template_type    = data["type"].endswith("_J12") or bool(data.get("template_type", False))
     user_email       = data["userEmail"]
     user_first_name = data["userFirstName"]
     user_last_name  = data["userLastName"]
@@ -225,7 +250,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
         qr_buffer.seek(0)
 
         # ── EVENT_REGISTRATION_CONFIRMED : génère le badge ZPL ───
-        if data["type"] in ("EVENT_REGISTRATION_CONFIRMED", "EVENT_REGISTRATION_CONFIRMED_J12"):
+        if data["type"] == "EVENT_REGISTRATION_CONFIRMED":
             logging.info("Premier envoi → Génération badge ZPL")
             generate_and_upload_badge(
                 qr_token=qr_token,
@@ -235,8 +260,8 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
                 user_role=user_role,
             )
 
-        # ── RESEND_REGISTRATION_CONFIRMED(_J12) : skip badge, email seul
-        elif data["type"] in ("RESEND_REGISTRATION_CONFIRMED", "RESEND_REGISTRATION_CONFIRMED_J12"):
+        # ── RESEND_REGISTRATION_CONFIRMED : skip badge, email seul
+        elif data["type"] == "RESEND_REGISTRATION_CONFIRMED":
             logging.info("Renvoi détecté → Skip génération badge")
 
         # ── Envoi email (commun aux deux types classiques) ────────
@@ -245,7 +270,6 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
             event_title, event_start, event_location,
             qr_base64, registration_id, qr_token,
             event_image_url=event_image_url,
-            template_type=template_type,
         )
 
     except Exception as e:

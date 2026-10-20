@@ -52,4 +52,10 @@ curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-email
 | `pdf_generator.py` | Génération badge ZPL (Zebra iT4S) |
 | `sender.py` | Construction MIME, envoi SMTP |
 | `config.py` | Constantes, variables d'environnement |
-| `templates/` | Templates HTML des billets |
+| `templates/email.html` | Template HTML unique (billet, QR codes, consignes) |
+| `templates_handler.py` | Moteur de rendu : `{{VAR}}`, `<!--IF:X-->`, `<!--EACH:X-->` |
+
+
+# Information à ajouter
+i  functions: Beginning execution of "us-central1-send_event_ticket"
+>  ERROR:root:Champs manquants: ['eventTitle', 'eventStartDate', 'eventLocation', 'qrCode']

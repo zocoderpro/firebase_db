@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:v="urn:schemas-microsoft-com:vml"
+      xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>{{DOC_TITLE}}</title>
+<!--[if mso]>
+<noscript><xml><o:OfficeDocumentSettings>
+  <o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings></xml></noscript>
+<![endif]-->
+<style>
+  /* Reset email */
+  body, table, td, a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+  table, td           { mso-table-lspace:0pt; mso-table-rspace:0pt; }
+  img                 { -ms-interpolation-mode:bicubic; border:0; display:block; }
+  a                   { text-decoration:none; }
+
+  /* Palette (design AthenaEvent) :
+     ground #F6F4EE · ink #14233F · muted #4F5A6B · line #DCD6C8 · field #B9B2A3
+     gold #B07D1F · gold-dk #7A5713 · gold-tint #FBEFD5 · gold-light #E2C27D
+     green #1F6B4A / #EAF3EE · red #A23B2A / #F8E7E3 · creme #FBF9F4 */
+
+  @media only screen and (max-width:680px) {
+    .outer-td   { padding:0 !important; }
+    .shell      { width:100% !important; min-width:100% !important; border-radius:0 !important; }
+    .hero-td    { padding:32px 20px 28px 20px !important; }
+    .hero-h1    { font-size:26px !important; }
+    .footer-td  { padding:24px 20px !important; }
+    .panel-td   { padding:26px 20px 28px 20px !important; }
+    .code-val   { font-size:26px !important; letter-spacing:.08em !important; }
+    .fact-td    { display:block !important; width:100% !important; padding:0 0 8px 0 !important; }
+    .btn-td     { display:block !important; width:100% !important; padding:0 0 10px 0 !important; }
+    .btn-a      { display:block !important; text-align:center !important; }
+    .btn-gap    { display:none !important; }
+    .ticket     { width:100% !important; }
+    .below-td   { padding:0 8px !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#F6F4EE;word-spacing:normal;">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#F6F4EE;line-height:1px;">{{PREHEADER}}{{PREHEADER_FILLER}}</div>
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#F6F4EE;">
+<tr>
+<td class="outer-td" align="center" style="padding:28px 16px;">
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="shell" style="width:680px;max-width:680px;background-color:#FFFFFF;border-radius:14px;overflow:hidden;box-shadow:0 8px 28px rgba(20,35,63,0.10);">
+
+    <!-- ══════════ EN-TÊTE + HERO (bandeau bleu centré) ══════════ -->
+    <tr>
+      <td class="hero-td" align="center" bgcolor="#14233F"
+          style="background-color:#14233F;background-image:linear-gradient(180deg,#1D3762 0%,#14233F 75%);padding:44px 40px 40px 40px;text-align:center;">
+
+        <!-- Médaillon logo -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center">
+          <tr>
+            <td style="border:2px solid #B07D1F;border-radius:50%;padding:3px;background-color:#14233F;">
+              <img src="{{LOGO}}" alt="{{BRAND}}" width="58" height="58"
+                   style="width:58px;height:58px;border-radius:50%;display:block;" />
+            </td>
+          </tr>
+        </table>
+
+        <!-- Marque -->
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:13px;letter-spacing:5px;text-transform:uppercase;color:#FFFFFF;padding-top:16px;line-height:1.5;">{{BRAND}}</div>
+        <div style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:12px;letter-spacing:1px;color:#9FB0C9;padding-top:2px;">{{KICKER}}</div>
+
+        <!-- Ornement doré -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="margin:22px auto 22px auto;">
+          <tr>
+            <td width="54" valign="middle" style="width:54px;vertical-align:middle;"><div style="width:54px;height:1px;background-color:#B07D1F;font-size:0;line-height:1px;">&nbsp;</div></td>
+            <td style="padding:0 12px;font-family:Arial,Helvetica,sans-serif;font-size:9px;line-height:9px;color:#E2C27D;">&#9670;</td>
+            <td width="54" valign="middle" style="width:54px;vertical-align:middle;"><div style="width:54px;height:1px;background-color:#B07D1F;font-size:0;line-height:1px;">&nbsp;</div></td>
+          </tr>
+        </table>
+
+        <!--IF:EYEBROW-->
+        <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:3.5px;text-transform:uppercase;color:#E2C27D;line-height:1.6;">{{EYEBROW}}</div>
+        <!--/IF:EYEBROW-->
+        <div class="hero-h1" style="font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.2;color:#FFFFFF;padding-top:12px;">{{TITLE}}</div>
+        <!--IF:SUBTITLE-->
+        <div style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:16px;line-height:1.55;color:#D3D8E2;padding-top:14px;">{{SUBTITLE}}</div>
+        <!--/IF:SUBTITLE-->
+        <!--IF:HEADER_TAG-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="margin:20px auto 0 auto;">
+          <tr><td style="border:1px solid #B07D1F;border-radius:20px;padding:6px 16px;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#E2C27D;">{{HEADER_TAG}}</td></tr>
+        </table>
+        <!--/IF:HEADER_TAG-->
+        
+      </td>
+    </tr>
+    <tr><td style="height:3px;font-size:3px;line-height:3px;background-color:#B07D1F;">&nbsp;</td></tr>
+
+    <!-- ══════════ CONTENU ══════════ -->
+    <tr>
+      <td class="panel-td" style="background-color:#FFFFFF;padding:34px 36px 34px 36px;">
+
+        <!--IF:GREETING-->
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:600;line-height:1.25;color:#14233F;padding-bottom:6px;">{{GREETING}}</div>
+        <!--/IF:GREETING-->
+        <!--IF:INTRO-->
+        <p style="margin:0 0 24px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#4F5A6B;">{{INTRO}}</p>
+        <!--/IF:INTRO-->
+
+        <!-- Code (activation, OTP, voucher…) -->
+        <!--IF:CODE-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:0;">
+          <tr>
+            <td align="center" style="background-color:#F6F4EE;border-radius:12px;padding:20px;text-align:center;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7A5713;">{{CODE_LABEL}}</div>
+              <div class="code-val" style="font-family:ui-monospace,'Courier New',Courier,monospace;font-size:34px;font-weight:700;letter-spacing:.14em;line-height:1.2;color:#14233F;padding-top:10px;">{{CODE}}</div>
+            </td>
+          </tr>
+        </table>
+        <div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>
+        <!--/IF:CODE-->
+
+        <!-- Tuiles de faits (date, lieu…) -->
+        <!--IF:FACTS-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:0 -6px;width:calc(100% + 12px);table-layout:fixed;">
+          <tr>
+            <!--EACH:FACTS-->
+            <td class="fact-td" valign="top" style="padding:0 6px;vertical-align:top;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td style="background-color:#F6F4EE;border-radius:10px;padding:14px 16px;">
+                    <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7A5713;">{{LABEL}}</div>
+                    <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.4;color:#14233F;padding-top:4px;">{{VALUE}}</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <!--/EACH:FACTS-->
+          </tr>
+        </table>
+        <div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>
+        <!--/IF:FACTS-->
+
+        <!-- Récapitulatif (libellé à gauche, valeur à droite) -->
+        <!--IF:INFO_ROWS-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:0;">
+          <tr>
+            <td style="background-color:#F6F4EE;border-radius:12px;padding:20px 22px;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7A5713;padding-bottom:6px;">{{INFO_TITLE}}</div>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <!--EACH:INFO_ROWS-->
+                <tr>
+                  <td valign="top" style="padding:6px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.4;color:#4F5A6B;vertical-align:top;">{{LABEL}}</td>
+                  <td valign="top" align="right" style="padding:6px 0 6px 12px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.4;font-weight:600;color:#14233F;text-align:right;vertical-align:top;"><!--IF:MONO--><span style="font-family:ui-monospace,'Courier New',Courier,monospace;font-size:14px;letter-spacing:.04em;background-color:#F6F4EE;border-radius:4px;padding:2px 8px;">{{VALUE}}</span><!--/IF:MONO--><!--IFNOT:MONO-->{{VALUE}}<!--/IFNOT:MONO--></td>
+                </tr>
+                <!--/EACH:INFO_ROWS-->
+              </table>
+            </td>
+          </tr>
+        </table>
+        <div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>
+        <!--/IF:INFO_ROWS-->
+
+        <!-- Étapes numérotées -->
+        <!--IF:STEPS-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:0;">
+          <tr>
+            <td>
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#14233F;padding-bottom:4px;">{{STEPS_TITLE}}</div>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <!--EACH:STEPS-->
+                <tr>
+                  <td valign="top" width="40" style="padding-top:12px;vertical-align:top;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td width="28" height="28" align="center" valign="middle"
+                            style="width:28px;height:28px;border-radius:50%;background-color:#F6F4EE;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;line-height:28px;color:#14233F;">{{NUMBER}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td valign="top" style="padding-top:14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#14233F;vertical-align:top;">{{TEXT}}</td>
+                </tr>
+                <!--/EACH:STEPS-->
+              </table>
+            </td>
+          </tr>
+        </table>
+        <div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>
+        <!--/IF:STEPS-->
+
+        <!-- Paragraphe libre avant les boutons -->
+        <!--IF:NOTE-->
+        <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#4F5A6B;">{{NOTE}}</p>
+        <!--/IF:NOTE-->
+
+        <!-- Boutons : principal (encre) + secondaire optionnel (contour) -->
+        <!--IF:CTA_URL-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="margin:6px auto 0 auto;">
+          <tr>
+            <td class="btn-td" align="center" valign="middle">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center" bgcolor="#14233F" style="background-color:#14233F;border-radius:8px;">
+                    <a class="btn-a" href="{{CTA_URL}}" target="_blank"
+                       style="display:inline-block;padding:14px 30px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;line-height:18px;color:#FFFFFF;text-decoration:none;border-radius:8px;">{{CTA_LABEL}}</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <!--IF:CTA2_URL-->
+            <td class="btn-gap" width="12" style="font-size:1px;line-height:1px;">&nbsp;</td>
+            <td class="btn-td" align="center" valign="middle">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center" bgcolor="#FFFFFF" style="background-color:#FFFFFF;border:1px solid #B9B2A3;border-radius:8px;">
+                    <a class="btn-a" href="{{CTA2_URL}}" target="_blank"
+                       style="display:inline-block;padding:13px 30px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;line-height:18px;color:#14233F;text-decoration:none;border-radius:8px;">{{CTA2_LABEL}}</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <!--/IF:CTA2_URL-->
+          </tr>
+        </table>
+        <div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>
+        <!--/IF:CTA_URL-->
+
+        <!-- Encadré : conseil (doré), vigilance (rosé) ou confirmation (vert) -->
+        <!--IF:ALERT_ANY-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:0;">
+          <tr>
+            <!--IF:ALERT_WARNING--><td style="background-color:#FBEFD5;border-radius:12px;padding:16px 18px;"><!--/IF:ALERT_WARNING-->
+            <!--IF:ALERT_DANGER--><td style="background-color:#F8E7E3;border-radius:12px;padding:16px 18px;"><!--/IF:ALERT_DANGER-->
+            <!--IF:ALERT_OK--><td style="background-color:#EAF3EE;border-radius:12px;padding:16px 18px;"><!--/IF:ALERT_OK-->
+              <!--IF:ALERT_TITLE-->
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#14233F;padding-bottom:6px;">{{ALERT_TITLE}}</div>
+              <!--/IF:ALERT_TITLE-->
+              <!--IF:ALERT_TEXT-->
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#14233F;">{{ALERT_TEXT}}</div>
+              <!--/IF:ALERT_TEXT-->
+              <!--IF:ALERT_ITEMS-->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <!--EACH:ALERT_ITEMS-->
+                <tr>
+                  <td valign="top" width="16" style="padding-top:4px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#14233F;vertical-align:top;">&bull;</td>
+                  <td valign="top" style="padding-top:4px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#14233F;vertical-align:top;">{{TEXT}}</td>
+                </tr>
+                <!--/EACH:ALERT_ITEMS-->
+              </table>
+              <!--/IF:ALERT_ITEMS-->
+            </td>
+          </tr>
+        </table>
+        <div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>
+        <!--/IF:ALERT_ANY-->
+
+        <!-- Phrase de clôture -->
+        <!--IF:NOTE_END-->
+        <p style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#4F5A6B;">{{NOTE_END}}</p>
+        <!--/IF:NOTE_END-->
+
+        <!-- Signature -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top:8px;">
+          <tr>
+            <td style="border-top:1px solid #DCD6C8;padding-top:20px;">
+              <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#4F5A6B;">{{SIGN_OFF}}</div>
+              <div style="font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:600;color:#14233F;padding-top:4px;">L'&eacute;quipe Athena Event</div>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+
+    <!-- ══════════ PIED DE PAGE (bleu) ══════════ -->
+    <tr>
+      <td class="footer-td" style="background-color:#14233F;padding:28px 36px;text-align:center;">
+        <div style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:14px;color:#D3D8E2;padding-bottom:14px;">Connect. Measure. Grow.</div>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center">
+          <tr><td style="width:36px;height:1px;background-color:#B07D1F;font-size:0;line-height:1px;">&nbsp;</td></tr>
+        </table>
+        <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#8C8676;padding-top:14px;padding-bottom:12px;line-height:1.9;">
+          <a href="tel:+261383204613" style="color:#C7D0DF;text-decoration:none;">+261 38 32 046 13</a>
+          &nbsp;<span style="color:#B07D1F;">&middot;</span>&nbsp;
+          <a href="mailto:sales@athena-event.com" style="color:#C7D0DF;text-decoration:none;">sales@athena-event.com</a>
+          &nbsp;<span style="color:#B07D1F;">&middot;</span>&nbsp;
+          <a href="https://www.athena-event.com" style="color:#C7D0DF;text-decoration:none;">www.athena-event.com</a>
+        </div>
+        <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:16px;color:#8C8676;">
+          &copy; {{YEAR}} Athena Event by Clearmind Analytics &mdash; Antananarivo, Madagascar
+        </div>
+      </td>
+    </tr>
+
+  </table>
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:680px;">
+    <tr>
+      <td class="below-td" align="center" style="padding:14px 32px 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;color:#8C8676;text-align:center;">
+        Cet email a &eacute;t&eacute; envoy&eacute; automatiquement par la plateforme Athena Event.<br>
+        Merci de ne pas y r&eacute;pondre directement.
+      </td>
+    </tr>
+  </table>
+
+</td>
+</tr>
+</table>
+</body>
+</html>

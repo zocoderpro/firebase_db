@@ -2,8 +2,9 @@
 # ║                                                              ║
 # ║   CONTENU DES EMAILS                                         ║
 # ║                                                              ║
-# ║   C'est ici que tu modifies les textes, l'ordre des blocs,  ║
-# ║   et les données affichées dans chaque type d'email.         ║
+# ║   C'est ici que tu modifies les textes et les données        ║
+# ║   affichées dans chaque type d'email. Le design (HTML/CSS)   ║
+# ║   vit dans templates/email.html — aucun HTML ici.            ║
 # ║                                                              ║
 # ╚══════════════════════════════════════════════════════════════╝
 
@@ -14,53 +15,12 @@ from datetime import datetime
 
 from config import APP_BASE_URL, SMTP_USER
 from sender import _build_message, _send_email, _format_expiry
-from templates.components import (
-    _hero,
-    _body_open,
-    _body_close,
-    _info_card,
-    _info_row,
-    _cta_button,
-    _cta_secondary,
-    _alert,
-    _code_block,
-    _steps_card,
-    _note,
-    _rjp2026_header,
-    _rjp2026_sponsors_footer,
-    _body_close_plain,
-    _body_reopen,
-    _build_html,
-)
-
-# Bandeau RJP 2026 (template_type=True) — logo organisateur + 12 sponsors, tous en CID.
-_RJP2026_ASSET_DIR = os.path.join(os.path.dirname(__file__), "assets", "rjp2026")
-_RJP2026_IMAGES = [
-    ("rjp_jpm", "jpm.png"),
-    ("rjp_bni", "bni.png"),
-    ("rjp_pamf", "pamf.png"),
-    ("rjp_acep", "acep.png"),
-    ("rjp_soredim", "soredim.png"),
-    ("rjp_sobatra", "sobatra.png"),
-    ("rjp_orca", "orca.png"),
-    ("rjp_bmoi", "bmoi.png"),
-    ("rjp_logia", "logia.jpg"),
-    ("rjp_total_energie", "total_energie.png"),
-    ("rjp_venture_capital", "venture_capital.jpg"),
-    ("rjp_wellcom", "wellcom.jpg"),
-    ("rjp_sanlam_allianz", "sanlam_allianz.png"),
-]
+from templates_handler import render_email
 
 
-def _load_rjp2026_images() -> list:
-    """Charge les images du bandeau RJP 2026 (logo JPM + sponsors) en tuples
-    (cid, bytes, subtype) — passés à _build_message(extra_images=...)."""
-    images = []
-    for cid, filename in _RJP2026_IMAGES:
-        subtype = "jpeg" if filename.lower().endswith((".jpg", ".jpeg")) else "png"
-        with open(os.path.join(_RJP2026_ASSET_DIR, filename), "rb") as f:
-            images.append((cid, f.read(), subtype))
-    return images
+def _row(label: str, value: str, mono: bool = False) -> dict:
+    """Ligne « libellé / valeur » du récapitulatif de templates/email.html."""
+    return {"LABEL": label, "VALUE": value, "MONO": mono}
 
 
 # ──────────────────────────────────────────────────────────────
@@ -73,32 +33,28 @@ def send_activation_code(email: str, first_name: str, code: str, expires_at: str
     safe_code = html.escape(code or "")
     safe_expiry = html.escape(str(expiry_date or ""))
 
-    rows = (
-        _hero(
-            title="Vérification de votre compte",
-            subtitle="Utilisez le code ci-dessous pour activer votre accès",
-            email_type_label="Activation de compte",
-        )
-        + _body_open(
-            greeting=f"Bonjour {safe_first_name},",
-            intro=(
-                "Merci de vous être inscrit sur <strong>Athena Event</strong>. "
-                "Pour activer votre compte, saisissez le code de vérification "
-                "ci-dessous dans l'application :"
-            )
-        )
-        + _code_block(safe_code, label="Votre code d'activation")
-        + _info_card(
-            _info_row("", "Expire dans", f"<strong>{safe_expiry} minutes</strong>"),
-            label="EXPIRATION"
-        )
-        + _alert(
+    html_content = render_email(
+        PREHEADER=f"Votre code d'activation Athena Event : {safe_code}",
+        EYEBROW="Activation de compte",
+        TITLE="Vérification de votre compte",
+        SUBTITLE="Utilisez le code ci-dessous pour activer votre accès",
+        GREETING=f"Bonjour {safe_first_name},",
+        INTRO=(
+            "Merci de vous être inscrit sur <strong>Athena Event</strong>. "
+            "Pour activer votre compte, saisissez le code de vérification "
+            "ci-dessous dans l'application :"
+        ),
+        CODE_LABEL="Votre code d'activation",
+        CODE=safe_code,
+        INFO_TITLE="Expiration",
+        INFO_ROWS=[_row("Expire dans", f"{safe_expiry} minutes")],
+        ALERT_KIND="warning",
+        ALERT_TEXT=(
             "<strong>Ne partagez jamais ce code.</strong> "
             "L'équipe Athena Event ne vous demandera jamais votre code "
-            "par email ou par téléphone.",
-            variant="warning"
-        )
-        + _body_close()
+            "par email ou par téléphone."
+        ),
+        SIGN_OFF="Cordialement,",
     )
 
     msg = _build_message(
@@ -110,7 +66,7 @@ def send_activation_code(email: str, first_name: str, code: str, expires_at: str
             f"Expire le : {expiry_date}\n\n"
             "Ne partagez jamais ce code.\n\n-- Athena Event"
         ),
-        html_content=_build_html(rows, preheader=f"Votre code d'activation Athena Event : {safe_code}"),
+        html_content=html_content,
     )
 
     _send_email(msg)
@@ -131,43 +87,35 @@ def send_hostess_activation_link(
     safe_password = html.escape(default_password or "")
     safe_activation_link = html.escape(activation_link or "", quote=True)
 
-    creds_rows = (
-        _info_row("", "Email", safe_email)
-        + _info_row(
-            "", "Mot de passe provisoire",
-            f"<code style='background-color:#f2ede1;padding:2px 7px;"
-            f"border-radius:4px;font-family:Courier New,monospace;"
-            f"font-size:13px;color:#163057;'>{safe_password}</code>"
-        )
-    )
-
-    rows = (
-        _hero(
-            title=f"Bienvenue, {safe_first_name} !",
-            subtitle="Votre compte hôtesse Athena Event a été créé",
-            email_type_label="Compte hôtesse",
-        )
-        + _body_open(
-            greeting=f"Bonjour {safe_first_name} {safe_last_name},",
-            intro=(
-                "Nous avons le plaisir de vous inviter à rejoindre notre équipe d'hôtesses "
-                "pour les événements <strong>Athena Event</strong>. Votre compte est prêt "
-                "— il ne vous reste qu'à l'activer."
-            )
-        )
-        + _info_card(creds_rows, label="Vos identifiants de connexion")
-        + _note(
+    html_content = render_email(
+        PREHEADER=f"Bienvenue dans l'équipe Athena Event, {safe_first_name} — activez votre compte",
+        EYEBROW="Compte hôtesse",
+        TITLE=f"Bienvenue, {safe_first_name} !",
+        SUBTITLE="Votre compte hôtesse Athena Event a été créé",
+        GREETING=f"Bonjour {safe_first_name} {safe_last_name},",
+        INTRO=(
+            "Nous avons le plaisir de vous inviter à rejoindre notre équipe d'hôtesses "
+            "pour les événements <strong>Athena Event</strong>. Votre compte est prêt "
+            "— il ne vous reste qu'à l'activer."
+        ),
+        INFO_TITLE="Vos identifiants de connexion",
+        INFO_ROWS=[
+            _row("Email", safe_email),
+            _row("Mot de passe provisoire", safe_password, mono=True),
+        ],
+        NOTE=(
             "Cliquez sur le bouton ci-dessous pour activer votre compte "
             "et définir votre propre mot de passe :"
-        )
-        + _cta_button(safe_activation_link, "Activer mon compte")
-        + _alert(
+        ),
+        CTA_URL=safe_activation_link,
+        CTA_LABEL="Activer mon compte",
+        ALERT_KIND="warning",
+        ALERT_TEXT=(
             "<strong>Sécurité :</strong> Vous devrez changer ce mot de passe "
             "provisoire lors de votre première connexion. "
-            "Ne partagez jamais vos identifiants avec qui que ce soit.",
-            variant="warning"
-        )
-        + _body_close("Nous sommes ravis de vous compter parmi notre équipe.<br>Cordialement,")
+            "Ne partagez jamais vos identifiants avec qui que ce soit."
+        ),
+        SIGN_OFF="Nous sommes ravis de vous compter parmi notre équipe.<br>Cordialement,",
     )
 
     msg = _build_message(
@@ -182,10 +130,7 @@ def send_hostess_activation_link(
             "Changez votre mot de passe à la première connexion.\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
-        html_content=_build_html(
-            rows,
-            preheader=f"Bienvenue dans l'équipe Athena Event, {safe_first_name} — activez votre compte"
-        ),
+        html_content=html_content,
         reply_to=SMTP_USER,
         message_id=f"<{user_id}@athena-event.com>",
     )
@@ -202,34 +147,30 @@ def send_reset_password_email(
     safe_token = html.escape(token or "")
     safe_expiry = html.escape(str(expiry_date or ""))
 
-    rows = (
-        _hero(
-            title="Réinitialisation du mot de passe",
-            subtitle="Utilisez le code ci-dessous pour créer un nouveau mot de passe",
-            email_type_label="Sécurité du compte",
-        )
-        + _body_open(
-            greeting=f"Bonjour {safe_first_name},",
-            intro=(
-                "Nous avons reçu une demande de réinitialisation de mot de passe "
-                "pour votre compte <strong>Athena Event</strong>. "
-                "Saisissez le code ci-dessous dans l'application pour continuer :"
-            )
-        )
-        + _code_block(safe_token, label="Votre code de réinitialisation")
-        + _info_card(
-            _info_row("", "Expire le", f"<strong>{safe_expiry}</strong>"),
-            label="EXPIRATION"
-        )
-        + _alert(
-            "<strong>Consignes de sécurité :</strong><br>"
+    html_content = render_email(
+        PREHEADER=f"Votre code de réinitialisation Athena Event : {safe_token}",
+        EYEBROW="Sécurité du compte",
+        TITLE="Réinitialisation du mot de passe",
+        SUBTITLE="Utilisez le code ci-dessous pour créer un nouveau mot de passe",
+        GREETING=f"Bonjour {safe_first_name},",
+        INTRO=(
+            "Nous avons reçu une demande de réinitialisation de mot de passe "
+            "pour votre compte <strong>Athena Event</strong>. "
+            "Saisissez le code ci-dessous dans l'application pour continuer :"
+        ),
+        CODE_LABEL="Votre code de réinitialisation",
+        CODE=safe_token,
+        INFO_TITLE="Expiration",
+        INFO_ROWS=[_row("Expire le", safe_expiry)],
+        ALERT_KIND="danger",
+        ALERT_TITLE="Consignes de sécurité",
+        ALERT_TEXT=(
             "Ne partagez jamais ce code. "
             "L'équipe Athena Event ne vous demandera jamais votre code par email ou téléphone. "
             "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email — "
-            "votre mot de passe restera inchangé.",
-            variant="danger"
-        )
-        + _body_close()
+            "votre mot de passe restera inchangé."
+        ),
+        SIGN_OFF="Cordialement,",
     )
 
     msg = _build_message(
@@ -244,10 +185,7 @@ def send_reset_password_email(
             "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
-        html_content=_build_html(
-            rows,
-            preheader=f"Votre code de réinitialisation Athena Event : {safe_token}"
-        ),
+        html_content=html_content,
         reply_to=SMTP_USER,
         message_id=f"<reset-{token}@athena-event.com>",
     )
@@ -273,37 +211,33 @@ def send_event_awaiting_approval(
     safe_company_name = html.escape(company_name or "")
     safe_created_at = html.escape(str(created_at or ""))
 
-    info_rows = (
-        _info_row("", "Événement", f"<strong>{safe_event_title}</strong>")
-        + _info_row("", "Organisateur", safe_company_name)
-        + _info_row("", "Créé le", safe_created_at)
-    )
-
-    rows = (
-        _hero(
-            title="Nouvel événement en attente",
-            subtitle="Une demande d'approbation vous attend sur la plateforme",
-            email_type_label="Action requise",
-        )
-        + _body_open(
-            greeting="Bonjour,",
-            intro=(
-                "Un nouvel événement vient d'être créé et attend votre approbation "
-                "sur la plateforme <strong>Athena Event</strong>."
-            )
-        )
-        + _info_card(info_rows, label="RÉSUMÉ DE L'ÉVÉNEMENT")
-        + _note(
+    html_content = render_email(
+        PREHEADER=f"Nouvel événement en attente — {safe_event_title}",
+        EYEBROW="Action requise",
+        TITLE="Nouvel événement en attente",
+        SUBTITLE="Une demande d'approbation vous attend sur la plateforme",
+        GREETING="Bonjour,",
+        INTRO=(
+            "Un nouvel événement vient d'être créé et attend votre approbation "
+            "sur la plateforme <strong>Athena Event</strong>."
+        ),
+        INFO_TITLE="Résumé de l'événement",
+        INFO_ROWS=[
+            _row("Événement", safe_event_title),
+            _row("Organisateur", safe_company_name),
+            _row("Créé le", safe_created_at),
+        ],
+        NOTE=(
             "Connectez-vous à votre tableau de bord administrateur pour "
             "consulter les détails complets et approuver ou rejeter cet événement."
-        )
-        + _alert(
-            " <strong>Action requise :</strong> Veuillez traiter cette demande "
+        ),
+        ALERT_KIND="warning",
+        ALERT_TEXT=(
+            "<strong>Action requise :</strong> Veuillez traiter cette demande "
             "dans les meilleurs délais pour permettre à l'organisateur de poursuivre "
-            "la préparation de son événement.",
-            variant="warning"
-        )
-        + _body_close()
+            "la préparation de son événement."
+        ),
+        SIGN_OFF="Cordialement,",
     )
 
     msg = _build_message(
@@ -319,10 +253,7 @@ def send_event_awaiting_approval(
             f"{APP_BASE_URL}/admin/events/pending\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
-        html_content=_build_html(
-            rows,
-            preheader=f"Nouvel événement en attente — {safe_event_title}"
-        ),
+        html_content=html_content,
         reply_to=SMTP_USER,
         message_id=f"<event-approval-{event_id}@athena-event.com>",
         x_priority="2",  # Haute priorité
@@ -349,40 +280,37 @@ def send_event_approved(
     safe_event_location = html.escape(event_location or "")
     safe_approved_at = html.escape(str(approved_at or ""))
 
-    info_rows = (
-        _info_row("", "Événement", f"<strong>{safe_event_title}</strong>")
-        + _info_row("", "Date", safe_event_start_date)
-        + _info_row("", "Lieu", safe_event_location)
-        + _info_row("", "Approuvé le", safe_approved_at)
-    )
-
-    rows = (
-        _hero(
-            title="Événement approuvé !",
-            subtitle="Félicitations, votre événement a été validé",
-            email_type_label="Approuvé",
-        )
-        + _body_open(
-            greeting=f"Bonjour {safe_company_name},",
-            intro=(
-                "Nous avons le plaisir de vous informer que votre événement "
-                "<strong>" + safe_event_title + "</strong> a été approuvé par notre équipe. "
-                "Vous pouvez désormais poursuivre la gestion de votre événement "
-                "sur la plateforme <strong>Athena Event</strong>."
-            )
-        )
-        + _info_card(info_rows, label="DÉTAILS DE L'ÉVÉNEMENT")
-        + _note(
+    html_content = render_email(
+        PREHEADER=f"Félicitations ! Votre événement {safe_event_title} a été approuvé",
+        EYEBROW="Approuvé",
+        TITLE="Événement approuvé !",
+        SUBTITLE="Félicitations, votre événement a été validé",
+        GREETING=f"Bonjour {safe_company_name},",
+        INTRO=(
+            "Nous avons le plaisir de vous informer que votre événement "
+            "<strong>" + safe_event_title + "</strong> a été approuvé par notre équipe. "
+            "Vous pouvez désormais poursuivre la gestion de votre événement "
+            "sur la plateforme <strong>Athena Event</strong>."
+        ),
+        FACTS=[
+            {"LABEL": "Date", "VALUE": safe_event_start_date},
+            {"LABEL": "Lieu", "VALUE": safe_event_location},
+        ],
+        INFO_TITLE="Détails de l'événement",
+        INFO_ROWS=[
+            _row("Événement", safe_event_title),
+            _row("Approuvé le", safe_approved_at),
+        ],
+        NOTE=(
             "Vous pouvez maintenant inviter des participants, gérer les inscriptions "
-            "et accéder à toutes les fonctionnalités de gestion d'événement.",
-            margin="20px 0 0 0"
-        )
-        + _alert(
+            "et accéder à toutes les fonctionnalités de gestion d'événement."
+        ),
+        ALERT_KIND="ok",
+        ALERT_TEXT=(
             "<strong>Prochaines étapes :</strong> Connectez-vous à votre espace "
-            "pour commencer à inviter vos participants et suivre les inscriptions en temps réel.",
-            variant="warning"
-        )
-        + _body_close("Nous vous souhaitons un excellent événement !")
+            "pour commencer à inviter vos participants et suivre les inscriptions en temps réel."
+        ),
+        SIGN_OFF="Nous vous souhaitons un excellent événement !",
     )
 
     msg = _build_message(
@@ -402,10 +330,7 @@ def send_event_approved(
             "Nous vous souhaitons un excellent événement !\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
-        html_content=_build_html(
-            rows,
-            preheader=f"Félicitations ! Votre événement {safe_event_title} a été approuvé"
-        ),
+        html_content=html_content,
         reply_to=SMTP_USER,
         message_id=f"<event-approved-{event_id}@athena-event.com>",
     )
@@ -427,33 +352,31 @@ def send_participant_invitation_known(
     safe_confirm_url = html.escape(confirm_url or "", quote=True)
     safe_decline_url = html.escape(decline_url or "", quote=True)
 
-    info_rows = (
-        _info_row("", "Entreprise invitée", f"<strong>{safe_company_name}</strong>")
-        + _info_row("", "Date de l'invitation", datetime.now().strftime('%d %B %Y'))
-    )
-
-    rows = (
-        _hero(
-            title="Invitation à participer",
-            subtitle="Un événement vous attend sur Athena Event",
-            email_type_label="Invitation événement",
-        )
-        + _body_open(
-            greeting="Bonjour,",
-            intro=(
-                "Nous espérons que vous allez bien. Nous vous contactons concernant "
-                "une invitation à participer à un événement organisé sur la plateforme "
-                f"<strong>Athena Event</strong> pour <strong>{safe_company_name}</strong>."
-            )
-        )
-        + _info_card(info_rows, label="Détails de l'invitation")
-        + _note(
+    html_content = render_email(
+        PREHEADER=f"Invitation à un événement Athena Event — {safe_company_name}",
+        EYEBROW="Invitation événement",
+        TITLE="Invitation à participer",
+        SUBTITLE="Un événement vous attend sur Athena Event",
+        GREETING="Bonjour,",
+        INTRO=(
+            "Nous espérons que vous allez bien. Nous vous contactons concernant "
+            "une invitation à participer à un événement organisé sur la plateforme "
+            f"<strong>Athena Event</strong> pour <strong>{safe_company_name}</strong>."
+        ),
+        INFO_TITLE="Détails de l'invitation",
+        INFO_ROWS=[
+            _row("Entreprise invitée", safe_company_name),
+            _row("Date de l'invitation", datetime.now().strftime('%d %B %Y')),
+        ],
+        NOTE=(
             "Pour plus d'informations ou si vous avez des questions, n'hésitez pas "
             "à nous contacter. Notre équipe se tient à votre disposition."
-        )
-        + _cta_button(safe_confirm_url, "Confirmer ma participation")
-        + _cta_secondary(safe_decline_url, "Décliner l'invitation")
-        + _body_close()
+        ),
+        CTA_URL=safe_confirm_url,
+        CTA_LABEL="Confirmer ma participation",
+        CTA2_URL=safe_decline_url,
+        CTA2_LABEL="Décliner l'invitation",
+        SIGN_OFF="Cordialement,",
     )
 
     msg = _build_message(
@@ -466,10 +389,7 @@ def send_participant_invitation_known(
             f"Décliner  : {decline_url}\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
-        html_content=_build_html(
-            rows,
-            preheader=f"Invitation à un événement Athena Event — {safe_company_name}"
-        ),
+        html_content=html_content,
         reply_to=SMTP_USER,
         message_id=f"<{token}@athena-event.com>",
     )
@@ -490,32 +410,26 @@ def send_participant_invitation_unknown(
     safe_company_name = html.escape(company_name or "")
     safe_signup_url = html.escape(signup_url or "", quote=True)
 
-    steps = [
-        "Cliquez sur le bouton ci-dessous pour "
-        "<strong style='color:#163057;'>créer votre compte gratuitement</strong>",
-        "Complétez les informations de "
-        "<strong style='color:#163057;'>votre entreprise</strong>",
-        "Votre participation est "
-        "<strong style='color:#163057;'>automatiquement confirm&#233;e</strong> &#10003;",
-    ]
-
-    rows = (
-        _hero(
-            title="Rejoignez un événement",
-            subtitle="Créez votre compte gratuit pour confirmer votre participation",
-            email_type_label="Nouvelle inscription",
-        )
-        + _body_open(
-            greeting="Bonjour,",
-            intro=(
-                "Nous vous contactons concernant une invitation à rejoindre un événement "
-                f"organisé sur <strong>Athena Event</strong> pour <strong>{safe_company_name}</strong>. "
-                "La création de votre compte est gratuite et prend moins de 2 minutes."
-            )
-        )
-        + _steps_card(steps)
-        + _cta_button(safe_signup_url, "Créer mon compte gratuit")
-        + _body_close()
+    html_content = render_email(
+        PREHEADER=f"Vous êtes invité à rejoindre un événement Athena Event — {safe_company_name}",
+        EYEBROW="Nouvelle inscription",
+        TITLE="Rejoignez un événement",
+        SUBTITLE="Créez votre compte gratuit pour confirmer votre participation",
+        GREETING="Bonjour,",
+        INTRO=(
+            "Nous vous contactons concernant une invitation à rejoindre un événement "
+            f"organisé sur <strong>Athena Event</strong> pour <strong>{safe_company_name}</strong>. "
+            "La création de votre compte est gratuite et prend moins de 2 minutes."
+        ),
+        STEPS_TITLE="Comment participer",
+        STEPS=[
+            {"NUMBER": 1, "TEXT": "Cliquez sur le bouton ci-dessous pour <strong>créer votre compte gratuitement</strong>"},
+            {"NUMBER": 2, "TEXT": "Complétez les informations de <strong>votre entreprise</strong>"},
+            {"NUMBER": 3, "TEXT": "Votre participation est <strong>automatiquement confirm&#233;e</strong> &#10003;"},
+        ],
+        CTA_URL=safe_signup_url,
+        CTA_LABEL="Créer mon compte gratuit",
+        SIGN_OFF="Cordialement,",
     )
 
     msg = _build_message(
@@ -529,10 +443,7 @@ def send_participant_invitation_unknown(
             f"Créer mon compte : {signup_url}\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
-        html_content=_build_html(
-            rows,
-            preheader=f"Vous êtes invité à rejoindre un événement Athena Event — {safe_company_name}"
-        ),
+        html_content=html_content,
         reply_to=SMTP_USER,
         message_id=f"<{token}@athena-event.com>",
     )
@@ -556,44 +467,36 @@ def send_activation_link_organizer(
     safe_company_name = html.escape(company_name or "")
     safe_activation_link = html.escape(activation_link or "", quote=True)
 
-    creds_rows = (
-        _info_row("", "Email", safe_email)
-        + _info_row(
-            "", "Mot de passe provisoire",
-            f"<code style='background-color:#f2ede1;padding:2px 7px;"
-            f"border-radius:4px;font-family:Courier New,monospace;"
-            f"font-size:13px;color:#163057;'>{safe_password}</code>"
-        )
-        + _info_row("", "Entreprise", f"<strong>{safe_company_name}</strong>")
-    )
-
-    rows = (
-        _hero(
-            title=f"Bienvenue, {safe_first_name} !",
-            subtitle="Votre compte organisateur Athena Event a été créé",
-            email_type_label="Compte organisateur",
-        )
-        + _body_open(
-            greeting=f"Bonjour {safe_first_name} {safe_last_name},",
-            intro=(
-                f"Nous avons le plaisir de vous accueillir en tant qu'organisateur "
-                f"sur <strong>Athena Event</strong>. Votre compte pour "
-                f"<strong>{safe_company_name}</strong> est prêt — activez-le pour commencer."
-            )
-        )
-        + _info_card(creds_rows, label="Vos identifiants de connexion")
-        + _note(
+    html_content = render_email(
+        PREHEADER=f"Bienvenue sur Athena Event, {safe_first_name} — activez votre compte organisateur",
+        EYEBROW="Compte organisateur",
+        TITLE=f"Bienvenue, {safe_first_name} !",
+        SUBTITLE="Votre compte organisateur Athena Event a été créé",
+        GREETING=f"Bonjour {safe_first_name} {safe_last_name},",
+        INTRO=(
+            f"Nous avons le plaisir de vous accueillir en tant qu'organisateur "
+            f"sur <strong>Athena Event</strong>. Votre compte pour "
+            f"<strong>{safe_company_name}</strong> est prêt — activez-le pour commencer."
+        ),
+        INFO_TITLE="Vos identifiants de connexion",
+        INFO_ROWS=[
+            _row("Email", safe_email),
+            _row("Mot de passe provisoire", safe_password, mono=True),
+            _row("Entreprise", safe_company_name),
+        ],
+        NOTE=(
             "Cliquez sur le bouton ci-dessous pour activer votre compte "
             "et définir votre propre mot de passe :"
-        )
-        + _cta_button(safe_activation_link, "Activer mon compte")
-        + _alert(
+        ),
+        CTA_URL=safe_activation_link,
+        CTA_LABEL="Activer mon compte",
+        ALERT_KIND="warning",
+        ALERT_TEXT=(
             "<strong>Sécurité :</strong> Vous devrez changer ce mot de passe "
             "provisoire lors de votre première connexion. "
-            "Ne partagez jamais vos identifiants avec qui que ce soit.",
-            variant="warning"
-        )
-        + _body_close("Nous sommes ravis de vous compter parmi nos organisateurs.<br>Cordialement,")
+            "Ne partagez jamais vos identifiants avec qui que ce soit."
+        ),
+        SIGN_OFF="Nous sommes ravis de vous compter parmi nos organisateurs.<br>Cordialement,",
     )
 
     msg = _build_message(
@@ -609,10 +512,7 @@ def send_activation_link_organizer(
             "Changez votre mot de passe à la première connexion.\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
-        html_content=_build_html(
-            rows,
-            preheader=f"Bienvenue sur Athena Event, {safe_first_name} — activez votre compte organisateur"
-        ),
+        html_content=html_content,
         reply_to=SMTP_USER,
     )
 
@@ -620,104 +520,100 @@ def send_activation_link_organizer(
     logging.info(f"Email organisateur envoyé à {email}")
 
 
-# Voucher RJP 2026 — template figé, propre à cet événement (co-brandé JPM).
-_RJP2026_EVENT_TITLE = "Rentrée du Jeune Patronat 2026"
-_RJP2026_REDEEM_URL = "https://athena-event.com/inscription/rentre-du-jeune-patronat-2026"
+# ──────────────────────────────────────────────────────────────
+# VOUCHER — template générique (remplace l'ancien template figé JPM)
+# ──────────────────────────────────────────────────────────────
+_VOUCHER_REDEEM_URL = "https://athena-event.com/inscription"
 
 
 def send_event_voucher(email: str, voucher_code: str) -> None:
-    """Envoie un voucher (code d'accès gratuit, montant ramené à 0) pour la
-    Rentrée du Jeune Patronat 2026. Template ponctuel co-brandé JPM — événement,
-    bandeau et lien d'inscription sont fixes, pas transmis par le backend."""
-    safe_voucher_code = html.escape(voucher_code or "")
+    """Envoie un voucher (code d'accès gratuit, montant ramené à 0).
 
-    rows = (
-        _rjp2026_header()
-        + _body_open(
-            greeting="Bonjour,",
-            intro=(
-                f"Nous avons le plaisir de vous offrir votre place pour la "
-                f"<strong>{_RJP2026_EVENT_TITLE}</strong>. Voici votre bon d'invitation :"
-            )
-        )
-        + _code_block(safe_voucher_code, label="Votre code voucher")
-        + _note(
+    Template générique : événement, bandeau et lien d'inscription ne sont plus
+    figés — le backend fournit `eventTitle` et `redeemUrl` dans le payload.
+    """
+    safe_voucher_code = html.escape(voucher_code or "")
+    event_title = "votre événement"
+    redeem_url = _VOUCHER_REDEEM_URL
+
+    html_content = render_email(
+        PREHEADER=f"Votre voucher pour {event_title} : {safe_voucher_code}",
+        EYEBROW="Voucher",
+        TITLE="Votre code d'accès",
+        SUBTITLE="Utilisez le code ci-dessous pour vous inscrire",
+        GREETING="Bonjour,",
+        INTRO=(
+            f"Nous avons le plaisir de vous offrir votre place pour "
+            f"<strong>{html.escape(event_title)}</strong>. Voici votre bon d'invitation :"
+        ),
+        CODE_LABEL="Votre code voucher",
+        CODE=safe_voucher_code,
+        NOTE=(
             "Pour vous inscrire gratuitement, cliquez sur le bouton S'inscrire, "
-            "choisissez l'option &laquo;&nbsp;Code promo des membres JPM&nbsp;&raquo; "
+            "choisissez l'option &laquo;&nbsp;Code promo&nbsp;&raquo; "
             "lors du paiement et saisissez votre code."
-        )
-        + _cta_button(_RJP2026_REDEEM_URL, "S'inscrire")
-        + _alert(
+        ),
+        CTA_URL=html.escape(redeem_url, quote=True),
+        CTA_LABEL="S'inscrire",
+        ALERT_KIND="warning",
+        ALERT_TEXT=(
             "<strong>Conservez cet email :</strong> votre code voucher vous sera "
             "demandé lors de l'inscription. Ne le partagez pas si vous ne "
-            "souhaitez pas qu'il soit utilisé par quelqu'un d'autre.",
-            variant="warning"
-        )
-        + _body_close_plain()
-        + _rjp2026_sponsors_footer()
-        + _body_reopen()
-        + _body_close("Au plaisir de vous accueillir.<br>Cordialement,")
+            "souhaitez pas qu'il soit utilisé par quelqu'un d'autre."
+        ),
+        SIGN_OFF="Au plaisir de vous accueillir.<br>Cordialement,",
     )
 
     msg = _build_message(
-        subject=f"Votre voucher — {_RJP2026_EVENT_TITLE}",
+        subject=f"Votre voucher — {event_title}",
         to_addr=email,
         text_content=(
-            f"RJP via Athena Event — Voucher\n\n"
             f"Bonjour,\n\n"
-            f"Nous avons le plaisir de vous offrir votre place pour la "
-            f"{_RJP2026_EVENT_TITLE}. Voici votre bon d'invitation.\n\n"
+            f"Nous avons le plaisir de vous offrir votre place pour "
+            f"{event_title}. Voici votre bon d'invitation.\n\n"
             f"Votre code voucher : {voucher_code}\n\n"
             "Pour vous inscrire gratuitement, cliquez sur le lien ci-dessous, "
-            "choisissez l'option « Code promo des membres JPM » lors du paiement "
+            "choisissez l'option « Code promo » lors du paiement "
             "et saisissez votre code.\n\n"
-            f"Inscription : {_RJP2026_REDEEM_URL}\n\n"
+            f"Inscription : {redeem_url}\n\n"
             "Conservez cet email : votre code voucher vous sera demandé lors de "
             "l'inscription.\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
-        html_content=_build_html(
-            rows,
-            preheader=f"Votre voucher pour {_RJP2026_EVENT_TITLE} : {safe_voucher_code}"
-        ),
+        html_content=html_content,
         reply_to=SMTP_USER,
         message_id=f"<voucher-{voucher_code}@athena-event.com>",
-        extra_images=_load_rjp2026_images(),
-        attach_logo=False,
-        from_name="RJP via Athena Event",
     )
 
     _send_email(msg)
-    logging.info(f"Email voucher RJP 2026 envoyé à {email}")
+    logging.info(f"Email voucher envoyé à {email}")
 
 
 def send_request_otp(destinataire: str, otp: str, event_image_url: str = None) -> None:
+    # event_image_url : accepté pour compatibilité avec le payload du backend, mais
+    # plus utilisé — le hero du nouveau design est uni (pas d'image de fond).
     safe_otp = html.escape(otp or "")
-    safe_event_image_url = html.escape(event_image_url, quote=True) if event_image_url else ""
 
-    rows = (
-        _hero(
-            title="Consultez vos participants",
-            subtitle="Votre code d'accès à la liste des présents",
-            email_type_label="Vérification d'accès",
-            hero_image_url=safe_event_image_url,
-        )
-        + _body_open(
-            greeting="Bonjour,",
-            intro=(
-                "Vous avez demandé à consulter la liste des personnes venues à votre "
-                "événement. Saisissez le code ci-dessous pour y accéder et découvrir qui "
-                "a répondu présent :"
-            )
-        )
-        + _code_block(safe_otp, label="Votre code OTP")
-        + _alert(
+    html_content = render_email(
+        PREHEADER=f"Votre code d'accès à la liste des participants : {safe_otp}",
+        EYEBROW="Vérification d'accès",
+        TITLE="Consultez vos participants",
+        SUBTITLE="Votre code d'accès à la liste des présents",
+        GREETING="Bonjour,",
+        INTRO=(
+            "Vous avez demandé à consulter la liste des personnes venues à votre "
+            "événement. Saisissez le code ci-dessous pour y accéder et découvrir qui "
+            "a répondu présent :"
+        ),
+        CODE_LABEL="Votre code OTP",
+        CODE=safe_otp,
+        ALERT_KIND="danger",
+        ALERT_TEXT=(
             "<strong>Ce code est valable quelques minutes.</strong> "
             "Ne le partagez avec personne — l'équipe Athena Event ne vous le demandera jamais. "
-            "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.",
-            variant="danger"
-        )
-        + _body_close()
+            "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email."
+        ),
+        SIGN_OFF="Cordialement,",
     )
 
     msg = _build_message(
@@ -731,7 +627,7 @@ def send_request_otp(destinataire: str, otp: str, event_image_url: str = None) -
             "Ne le partagez avec personne.\n\n"
             "Cordialement,\nL'équipe Athena Event"
         ),
-        html_content=_build_html(rows, preheader=f"Votre code d'accès à la liste des participants : {safe_otp}"),
+        html_content=html_content,
     )
 
     _send_email(msg)

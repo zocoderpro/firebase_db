@@ -11,8 +11,8 @@ from email.mime.image import MIMEImage
 from email.utils import formataddr
 
 from config import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
-from templates_handler import load_template, render_template
-from attachments import process_attachment, is_pdf_url
+from brochure_emails import build_html
+from attachments import process_attachment
 
 
 def send_brochure_email_smtp(data):
@@ -39,18 +39,8 @@ def send_brochure_email_smtp(data):
     
     print(f"📧 Préparation email type {event_type or 'UNKNOWN'} (Template {template_num}) pour {recipients}")
 
-    if event_type == "EVENT_REGISTRATION_REQUEST_SECOND_CONFIRMATION":
-        data.setdefault("_hide_attachments_section", True)
-    
-    # Détecter si on a des PDFs (pour cacher la section visuelle)
-    has_pdfs = any(is_pdf_url(url) for url in (attachment_urls or []) if url)
-    if has_pdfs:
-        print("📄 PDFs détectés, section visuelle cachée (PDFs en pièces jointes)")
-        data["_hide_attachments_section"] = True
-    
-    # ── Charger et rendre le template ──
-    template_html = load_template(template_num)
-    html_content = render_template(template_html, data)
+    # ── Rendre le template unique (templates/email.html) pour ce type d'email ──
+    html_content = build_html(template_num, data)
 
     # ── Tracking pixel ───────────────────────────────────────────
     email_tracker = data.get("emailTracker", "").strip()

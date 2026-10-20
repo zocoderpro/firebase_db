@@ -1,6 +1,26 @@
 {
   "functions": [
     {
+      "source": "functions-email-firebase",
+      "codebase": "email-service",
+      "runtime": "python312"
+    },
+    {
+      "source": "functions-ticket-firebase",
+      "codebase": "ticket-service",
+      "runtime": "python312"
+    },
+    {
+      "source": "functions-brochure-firebase",
+      "codebase": "brochure-service",
+      "runtime": "python312"
+    },
+    {
+      "source": "functions-sms-mapi-firebase",
+      "codebase": "sms-mapi-test-service",
+      "runtime": "python312"
+    },
+    {
       "source": "functions-newsletter-jpm-firebase",
       "codebase": "newsletter-jpm-service",
       "runtime": "python312"
@@ -40,6 +60,16 @@
     {
       "source": "functions-rjp-erratum-firebase",
       "codebase": "rjp-erratum-service",
+      "runtime": "python312"
+    },
+    {
+      "source": "functions-rjp-jourj-firebase",
+      "codebase": "rjp-jourj-service",
+      "runtime": "python312"
+    },
+    {
+      "source": "functions-rjp-update-firebase",
+      "codebase": "rjp-update-service",
       "runtime": "python312"
     }
   ],

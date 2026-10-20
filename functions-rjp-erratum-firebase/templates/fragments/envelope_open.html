@@ -24,73 +24,71 @@
         .ExternalClass, .ExternalClass p, .ExternalClass span,
         .ExternalClass font, .ExternalClass td, .ExternalClass div { line-height:100%; }
 
-        /* ── Overrides mobile (max 680px) ──
-           Chaque classe correspond à un élément identifiable dans le HTML ci-dessous */
+        /* ── Design System Variables ── */
+        :root {
+            --ground: #F6F4EE;
+            --surface: #FFFFFF;
+            --ink: #14233F;
+            --muted: #4F5A6B;
+            --line: #DCD6C8;
+            --field: #B9B2A3;
+            --gold: #B07D1F;
+            --gold-dk: #7A5713;
+            --gold-tint: #FBEFD5;
+            --green: #1F6B4A;
+            --green-tint: #EAF3EE;
+            --red: #A23B2A;
+            --red-tint: #F8E7E3;
+            --grey: #8C8676;
+        }
+
+        /* Reset email */
+        body, table, td, a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+        table, td           { mso-table-lspace:0pt; mso-table-rspace:0pt; }
+        img                 { -ms-interpolation-mode:bicubic; border:0; display:block; }
+        .ReadMsgBody        { width:100%; }
+        .ExternalClass      { width:100%; }
+        .ExternalClass, .ExternalClass p, .ExternalClass span,
+        .ExternalClass font, .ExternalClass td, .ExternalClass div { line-height:100%; }
+
+        /* ── Overrides mobile (max 680px) ── */
         @media only screen and (max-width:680px) {
-
-            /* Email pleine largeur sur mobile, sans border-radius */
-            .email-outer-td  { padding:0 !important; }
-            .email-shell     { width:100% !important; min-width:100% !important;
-                                border-radius:0 !important; }
-
-            /* Hero plus compact */
-            .hero-td         { padding:26px 20px 24px 20px !important; }
-
-            /* Logo + nom de marque : empilés verticalement */
-            .logo-brand-td   { display:block !important; width:100% !important; }
-            .logo-img        { width:34px !important; height:34px !important; }
-            .brand-name      { font-size:16px !important; }
-            .brand-sub       { font-size:9px !important; }
-
-            /* Badge type email : passe sous le logo, aligné à gauche */
-            .ref-badge-td    { display:block !important; width:100% !important;
-                                text-align:left !important;
-                                padding-top:12px !important; padding-left:0 !important; }
+            .email-outer-td { padding:0 !important; }
+            .email-shell    { width:100% !important; min-width:100% !important; border-radius:0 !important; }
+            .hero-td        { padding:26px 20px 24px 20px !important; }
+            .logo-brand-td  { display:block !important; width:100% !important; }
+            .logo-img       { width:34px !important; height:34px !important; }
+            .brand-name     { font-size:16px !important; }
+            .brand-sub      { font-size:9px !important; }
+            .ref-badge-td    { display:block !important; width:100% !important; text-align:left !important; padding-top:12px !important; padding-left:0 !important; }
             .ref-badge-inner { text-align:left !important; }
-
-            /* Titres hero plus petits */
-            .hero-title      { font-size:21px !important; line-height:27px !important; }
-            .hero-sub        { font-size:12px !important; }
-
-            /* Corps de l'email : padding réduit */
-            .body-td         { padding:26px 20px 0 20px !important; }
-
-            /* Cards : padding réduit */
-            .card-td         { padding:16px !important; }
-
-            /* Footer */
-            .footer-td       { padding:24px 20px !important; }
-
-            /* Footer : deux colonnes → empilées verticalement */
-            .footer-col-l    { display:block !important; width:100% !important; }
-            .footer-col-r    { display:block !important; width:100% !important;
-                                text-align:left !important; padding-top:14px !important; }
-
-            /* Note légale sous l'email */
-            .below-note      { padding:0 16px !important; }
-
-            /* QR code : taille réduite sur mobile */
-            .qr-td           { padding:20px 14px !important; }
-            .qr-img          { width:160px !important; height:160px !important; }
-            .qr-frame-td     { padding:10px !important; }
-
-            /* Texte des consignes de sécurité */
-            .sec-text-td     { font-size:12px !important; }
+            .hero-title     { font-size:21px !important; line-height:27px !important; }
+            .hero-sub       { font-size:12px !important; }
+            .body-td        { padding:26px 20px 0 20px !important; }
+            .card-td        { padding:16px !important; }
+            .cta-td         { padding:14px 24px !important; }
+            .cta-link       { font-size:14px !important; }
+            .code-block-td  { padding:22px 14px !important; }
+            .code-val       { font-size:28px !important; letter-spacing:8px !important; }
+            .footer-td      { padding:24px 20px !important; }
+            .footer-col-l   { display:block !important; width:100% !important; }
+            .footer-col-r   { display:block !important; width:100% !important; text-align:left !important; padding-top:14px !important; }
+            .below-note     { padding:0 16px !important; }
         }
     </style>
 </head>
-<body style="margin:0;padding:0;background-color:#eef1f5;word-spacing:normal;">
-<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#eef1f5;line-height:1px;">{{PREHEADER}}{{PREHEADER_FILLER}}</div>
+<body style="margin:0;padding:0;background-color:#F6F4EE;word-spacing:normal;">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#F6F4EE;line-height:1px;">{{PREHEADER}}{{PREHEADER_FILLER}}</div>
 <!--[if mso | IE]>
 <table role="presentation" border="0" cellpadding="0" cellspacing="0"
-       width="100%" style="background-color:#eef1f5;"><tr><td>
+       width="100%" style="background-color:#F6F4EE;"><tr><td>
 <![endif]-->
 <table role="presentation" border="0" cellpadding="0" cellspacing="0"
-       width="100%" style="background-color:#eef1f5;">
+       width="100%" style="background-color:#F6F4EE;">
   <tr>
     <td class="email-outer-td" align="center" style="padding:28px 16px;">
       <table role="presentation" border="0" cellpadding="0" cellspacing="0"
              class="email-shell"
-             style="width:680px;max-width:680px;background-color:#ffffff;
+             style="width:680px;max-width:680px;background-color:#FFFFFF;
                     border-radius:14px;overflow:hidden;
-                    box-shadow:0 8px 28px rgba(20,41,77,0.10);">
+                    box-shadow:0 8px 28px rgba(20,35,63,0.10);">

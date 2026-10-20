@@ -19,8 +19,8 @@
 
 1. Le backend Spring publie un message JSON sur le topic `prod-event-ended`
 2. `main.py` décode le payload et valide les champs requis selon le `type`
-3. Rendu HTML via templates complets (fichiers `.html` par type)
-4. Envoi SMTP avec logo en CID
+3. Rendu HTML via le template unique `templates/email.html` (un constructeur par numéro de template dans `brochure_emails.py`)
+4. Envoi SMTP : logos et images convertis en pièces CID inline
 
 ## Exemples curl
 
@@ -57,7 +57,10 @@ curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-event
 | Fichier | Rôle |
 |---------|------|
 | `main.py` | Point d'entrée Pub/Sub, validation, dispatch |
-| `brochure_senders.py` | Logique métier, contenu des brochures |
-| `sender.py` | Construction MIME, envoi SMTP |
+| `brochure_emails.py` | Contenu des emails (un constructeur par `staticTemplateNum`) |
+| `event_content.py` | Partenaires/sponsors figés des éditions RJP 2026 et PostgreSQL Conference 2026 (données) |
+| `email_sender.py` | Construction MIME, pièces jointes, envoi SMTP |
+| `templates_handler.py` | Moteur de rendu : `{{VAR}}`, `<!--IF:X-->`, `<!--EACH:X-->` |
 | `config.py` | Constantes, variables d'environnement |
-| `templates/` | Templates HTML complets par type |
+| `templates/email.html` | Template HTML unique (design AthenaEvent) |
+| `templates/img/` | Logos des partenaires des éditions (embarqués par `asset_uri`) |

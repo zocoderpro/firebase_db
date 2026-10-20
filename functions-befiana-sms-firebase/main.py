@@ -37,14 +37,19 @@ Exemple de publication Pub/Sub (emulateur, port 8085) :
 import json
 import logging
 
-from firebase_admin import initialize_app
+from firebase_admin import initialize_app, get_app
 from firebase_functions import https_fn, pubsub_fn
 import requests
 
 from clients.befiana_sms_client import BefianaError, send_sms
 from config import API_SHARED_KEY, BEFIANA_API_KEY
 
-initialize_app()
+# Initialiser Firebase Admin une seule fois (éviter l'erreur "already exists" dans l'émulateur)
+try:
+    get_app()
+except ValueError:
+    initialize_app()
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -22,7 +22,7 @@ _LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "logo.jpeg")
 def _load_logo_image_part() -> MIMEImage:
     """Charge le logo Athena Event depuis assets/logo.jpeg pour intégration CID.
     Content-ID "logo" — référencé par LOGO_URL="cid:logo" dans config.py, utilisé
-    par templates/fragments/hero.html via {{LOGO_URL}}."""
+    par templates/email.html via {{LOGO}}."""
     with open(_LOGO_PATH, "rb") as f:
         image = MIMEImage(f.read(), _subtype="jpeg")
     image.add_header("Content-ID", "<logo>")
@@ -57,13 +57,10 @@ def _build_message(
     c'est ce qui garantit qu'il ne dépend plus jamais d'un serveur externe.
 
     extra_images : liste de tuples (cid, bytes, subtype) pour des images
-                   supplémentaires (ex: QR code, bandeau RJP 2026) à attacher en
-                   plus du logo.
-    attach_logo  : False pour les templates ponctuels où le logo Athena n'apparaît
-                   pas dans le HTML (ex: bandeau RJP 2026 qui remplace le hero) —
-                   évite une pièce jointe cid:logo orpheline.
-    from_name    : nom affiché dans l'expéditeur (ex: "RJP via Athena Event" pour
-                   les templates co-brandés).
+                   supplémentaires (ex: QR code) à attacher en plus du logo.
+    attach_logo  : False pour les templates où le logo Athena n'apparaît pas
+                   dans le HTML — évite une pièce jointe cid:logo orpheline.
+    from_name    : nom affiché dans l'expéditeur.
     """
     outer = MIMEMultipart('related')
     alt = MIMEMultipart('alternative')

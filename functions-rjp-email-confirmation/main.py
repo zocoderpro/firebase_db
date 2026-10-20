@@ -20,13 +20,18 @@ functions-brochure-firebase).
 """
 import logging
 
-from firebase_admin import initialize_app
+from firebase_admin import initialize_app, get_app
 from firebase_functions import pubsub_fn
 
 from attachments import load_attachments
 from email_sender import send_rjp_email_confirmation as _send_rjp_email_confirmation
 
-initialize_app()
+# Initialiser Firebase Admin une seule fois (éviter l'erreur "already exists" dans l'émulateur)
+try:
+    get_app()
+except ValueError:
+    initialize_app()
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

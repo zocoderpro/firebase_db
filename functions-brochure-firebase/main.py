@@ -3,16 +3,20 @@ Point d'entrée principal pour la fonction Cloud Function brochure.
 Décodage du message Pub/Sub et orchestration de l'envoi d'email.
 """
 from firebase_functions import pubsub_fn, options
-from firebase_admin import initialize_app
+from firebase_admin import initialize_app, get_app
 import json
 import base64
 
 # Initialiser Firebase Admin
-initialize_app()
+# Initialiser Firebase Admin une seule fois (éviter l'erreur "already exists" dans l'émulateur)
+try:
+    get_app()
+except ValueError:
+    initialize_app()
+
 
 # Importer les modules métier
 from email_sender import send_brochure_email_smtp
-
 
 
 @pubsub_fn.on_message_published(
@@ -24,7 +28,7 @@ from email_sender import send_brochure_email_smtp
 def send_brochure_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -> None:
     """
     Fonction Cloud pubsub déclenchée pour envoyer des emails brochure.
-    
+
     Workflow:
     1. Décoder le message Pub/Sub (base64 + JSON)
     2. Valider le type = "BROCHURE"
@@ -33,7 +37,7 @@ def send_brochure_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedDa
     try:
         # 1. Décoder le message Pub/Sub (base64)
         message_data = event.data.message.data
-        
+
         if isinstance(message_data, bytes):
             decoded_data = base64.b64decode(message_data).decode("utf-8")
         elif isinstance(message_data, str):
@@ -43,19 +47,19 @@ def send_brochure_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedDa
                 decoded_data = message_data
         else:
             decoded_data = str(message_data)
-        
+
         print(f"📦 Message base64 décodé")
-        
+
         # 2. Parser le JSON
         data = json.loads(decoded_data)
-        
+
         event_type = data.get("type")
         print(f"📨 Message reçu: {data.get('subject', 'Sans objet')}")
         print(f"   • Entreprise: {data.get('company_name', 'N/A')}")
         print(f"   • Type: {event_type}")
         print(f"   • Template: {data.get('staticTemplateNum', 'N/A')}")
         print(f"   • Pièces jointes: {len(data.get('attachmentUrls', [])) if data.get('attachmentUrls') else 0}")
-        
+
         # 3. Valider le type
         if event_type == "BROCHURE":
             pass
@@ -114,56 +118,42 @@ def send_brochure_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedDa
             data["eventTitle"] = "Mise en relation"
             data.setdefault("company_name", "Athena Event")
             data.setdefault("company_email", "noreply@athena-event.com")
-        elif event_type in ("REMINDER", "REMINDER_J12"):
+        elif event_type == "REMINDER":
             print("   • Rappel d'événement (J-1) détecté")
             data.setdefault("_hide_attachments_section", True)
             # Le backend peut envoyer "recipients", "destinataire" ou "destEmail"
             if not data.get("recipients"):
                 data["recipients"] = data.get("destinataire") or data.get("destEmail")
-            # REMINDER_J12, ou legacy template_type=True → Rentrée du Jeune Patronat 2026, sinon Postgres (historique)
-            if event_type == "REMINDER_J12" or bool(data.get("template_type", False)):
-                print("   • Variante Rentrée du Jeune Patronat 2026")
-                data["staticTemplateNum"] = 10
-                data["subject"] = "J-1 avant la Rentrée du Jeune Patronat 2026 !"
-                data["eventTitle"] = "2e édition de la Rentrée du Jeune Patronat"
-            else:
-                data.setdefault("staticTemplateNum", 8)
-                data["subject"] = "J-1 avant la conférence PostgreSQL User Group Madagascar – Préparez votre CV !"
-                data["eventTitle"] = "PostgreSQL User Group Madagascar"
+            data.setdefault("staticTemplateNum", 8)
+            data["subject"] = "J-1 avant la conférence PostgreSQL User Group Madagascar – Préparez votre CV !"
+            data["eventTitle"] = "PostgreSQL User Group Madagascar"
             data.setdefault("company_name", "Athena Event")
             data.setdefault("company_email", "noreply@athena-event.com")
-        elif event_type in ("CUSTOM_EMAIL", "CUSTOM_EMAIL_J12"):
+        elif event_type == "CUSTOM_EMAIL":
             print("   • Email de remerciement post-événement détecté")
             data.setdefault("_hide_attachments_section", True)
             # Le backend envoie "recipient" (singulier)
             if not data.get("recipients"):
                 data["recipients"] = data.get("recipient")
-            # CUSTOM_EMAIL_J12, ou legacy template_type=True → Rentrée du Jeune Patronat 2026, sinon PGConf (historique)
-            if event_type == "CUSTOM_EMAIL_J12" or bool(data.get("template_type", False)):
-                print("   • Variante Rentrée du Jeune Patronat 2026")
-                data["staticTemplateNum"] = 11
-                data["subject"] = "Merci d'avoir été des nôtres — Rentrée du Jeune Patronat 2026"
-                data["eventTitle"] = "2e édition de la Rentrée du Jeune Patronat"
-            else:
-                data.setdefault("staticTemplateNum", 9)
-                data["subject"] = "Merci d'avoir été des nôtres — Madagascar PostgreSQL Conference 2026"
-                data["eventTitle"] = "Madagascar PostgreSQL Conference 2026"
+            data.setdefault("staticTemplateNum", 9)
+            data["subject"] = "Merci d'avoir été des nôtres — Madagascar PostgreSQL Conference 2026"
+            data["eventTitle"] = "Madagascar PostgreSQL Conference 2026"
             data.setdefault("company_name", "Athena Event")
             data.setdefault("company_email", "noreply@athena-event.com")
         else:
-            print(f"⚠️ Type incorrect: {event_type}, attendu: BROCHURE, EVENT_REGISTRATION_REQUEST_SECOND_CONFIRMATION, EVENT_THANK_YOU, CONTACT_REQUEST, ACCEPT_CONTACT_REQUEST, REMINDER, REMINDER_J12, CUSTOM_EMAIL ou CUSTOM_EMAIL_J12")
+            print(f"⚠️ Type incorrect: {event_type}, attendu: BROCHURE, EVENT_REGISTRATION_REQUEST_SECOND_CONFIRMATION, EVENT_THANK_YOU, CONTACT_REQUEST, ACCEPT_CONTACT_REQUEST, REMINDER, CUSTOM_EMAIL")
             return
-        
+
         # 4. Envoyer l'email (orchéstrer validation + template + envoi)
         send_brochure_email_smtp(data)
-        
+
         print("✅ Email brochure traité avec succès")
-    
+
     except json.JSONDecodeError as e:
         print(f"❌ Erreur décodage JSON: {e}")
         print(f"📦 Données reçues (raw): {event.data.message.data}")
         raise
-    
+
     except Exception as e:
         print(f"❌ Erreur traitement message brochure: {e}")
         import traceback

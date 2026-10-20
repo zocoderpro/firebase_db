@@ -1,12 +1,17 @@
 import logging
 
-from firebase_admin import initialize_app
+from firebase_admin import initialize_app, get_app
 from firebase_functions import pubsub_fn
 
 from reminder_senders import send_rjp_reminder
 
 # Initialiser Firebase Admin
-initialize_app()
+# Initialiser Firebase Admin une seule fois (éviter l'erreur "already exists" dans l'émulateur)
+try:
+    get_app()
+except ValueError:
+    initialize_app()
+
 
 
 # ╔══════════════════════════════════════════════════════════════╗

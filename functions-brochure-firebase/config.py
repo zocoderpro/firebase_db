@@ -13,17 +13,6 @@ SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
 # Configuration Firebase Storage
 BUCKET_NAME = os.environ.get("BUCKET_NAME", "athena-event-prod")
 
-# Mapping des templates
-TEMPLATES = {
-    1: "template_1.html",  # Corporate Élégant
-    2: "template_2.html",  # Modern Professional
-    3: "template_3.html",  # Business Professional
-    4: "template_4.html",  # Confirmation d'inscription événementielle
-    5: "email_remerciement.html",  # Remerciement post-événement
-    6: "email_contact_request.html",  # Demandes de mise en relation entre participants
-    7: "email_contact_accepted.html",  # Acceptation d'une demande de mise en relation
-    8: "email_reminder.html",  # Rappel d'événement (J-1)
-    9: "email_remerciement_pgconf.html",  # Remerciement post-événement (Madagascar PostgreSQL Conference 2026)
-    10: "email_reminder_rjp.html",  # Rappel d'événement (J-1) — Rentrée du Jeune Patronat 2026
-    11: "email_remerciement_rjp.html",  # Remerciement post-événement — Rentrée du Jeune Patronat 2026
-}
+# Marque affichée dans le bandeau d'en-tête de templates/email.html
+BRAND_NAME = "Athena Event"
+BRAND_KICKER = "by Clearmind Analytics"

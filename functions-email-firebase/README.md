@@ -23,7 +23,7 @@
 1. Le backend Spring publie un message JSON sur le topic `prod-registration-confirmed`
 2. `main.py` décode le payload et valide les champs requis selon le `type`
 3. Dispatch vers la fonction d'envoi correspondante dans `email_senders.py`
-4. Rendu HTML via templates dans `templates/fragments/`
+4. Rendu HTML via le template unique `templates/email.html`
 5. Envoi SMTP avec logo en CID (`cid:logo`)
 
 ## Exemples curl
@@ -71,6 +71,5 @@ curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-regis
 | `email_senders.py` | Logique métier, contenu des emails |
 | `sender.py` | Construction MIME, envoi SMTP |
 | `config.py` | Constantes, variables d'environnement |
-| `templates/components.py` | Composants visuels (hero, cards, boutons) |
-| `templates/fragments/*.html` | Fragments HTML réutilisables |
-| `templates_handler.py` | Moteur de rendu de templates |
+| `templates/email.html` | Template HTML unique (design AthenaEvent) |
+| `templates_handler.py` | Moteur de rendu : `{{VAR}}`, `<!--IF:X-->`, `<!--EACH:X-->` |

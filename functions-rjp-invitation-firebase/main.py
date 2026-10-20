@@ -1,12 +1,17 @@
 import logging
 
-from firebase_admin import initialize_app
+from firebase_admin import initialize_app, get_app
 from firebase_functions import pubsub_fn
 
 from invitation_senders import send_rjp_invitation, send_rjp_invitation_batch
 
 # Initialiser Firebase Admin
-initialize_app()
+# Initialiser Firebase Admin une seule fois (éviter l'erreur "already exists" dans l'émulateur)
+try:
+    get_app()
+except ValueError:
+    initialize_app()
+
 
 
 # ╔══════════════════════════════════════════════════════════════╗
