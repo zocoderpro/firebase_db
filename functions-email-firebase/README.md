@@ -15,6 +15,7 @@
 | `EVENT_APPROVED` | Notification organisateur - événement approuvé | `companyName`, `eventId`, `eventTitle`, `eventStartDate`, `eventLocation`, `approvedAt` |
 | `PARTICIPANT_INVITATION_KNOWN` | Invitation participant (connu) | `type`, `companyName`, `eventId`, `token`, `url`, `template` |
 | `PARTICIPANT_INVITATION_UNKNOWN` | Invitation participant (inconnu) | `type`, `companyName`, `eventId`, `token`, `url`, `template` |
+| `EVENT_INVITATION` | Invitation à s'inscrire (bouton « Confirmer ma participation ») | `type`, `email`, `fullName`, `eventTitle`, `url` |
 | `REQUEST_OTP` | Code OTP accès liste participants | `otp` |
 | `EVENT_VOUCHER` | Voucher événement | `type`, `email`, `voucherCode` |
 

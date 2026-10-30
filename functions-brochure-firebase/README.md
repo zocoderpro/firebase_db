@@ -58,7 +58,7 @@ curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-event
 |---------|------|
 | `main.py` | Point d'entrée Pub/Sub, validation, dispatch |
 | `brochure_emails.py` | Contenu des emails (un constructeur par `staticTemplateNum`) |
-| `event_content.py` | Partenaires/sponsors figés des éditions RJP 2026 et PostgreSQL Conference 2026 (données) |
+| `event_content.py` | Partenaires/sponsors figés des éditions Rencontre Géopolitique 2026 et PostgreSQL Conference 2026 (données) |
 | `email_sender.py` | Construction MIME, pièces jointes, envoi SMTP |
 | `templates_handler.py` | Moteur de rendu : `{{VAR}}`, `<!--IF:X-->`, `<!--EACH:X-->` |
 | `config.py` | Constantes, variables d'environnement |

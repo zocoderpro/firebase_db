@@ -14,6 +14,7 @@ from email_senders import (
     send_participant_invitation_unknown,
     send_request_otp,
     send_event_voucher,
+    send_event_invitation,
 )
 
 # Initialiser Firebase Admin
@@ -102,6 +103,10 @@ def process_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -
         email_field = data.get("email") or data.get("companyEmail") or data.get("userEmail") or ""
         logging.info(f"Email extrait: '{email_field}'")
 
+    elif email_type == "EVENT_INVITATION":
+        required_fields = ["type", "email", "fullName", "eventTitle", "url"]
+        email_field = data.get("email", "")
+
     elif email_type == "REQUEST_OTP":
         email_field = data.get("destinataire", "")
         required_fields = ["otp"]
@@ -181,6 +186,9 @@ def process_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -
         send_participant_invitation_unknown(
             email_field, data["companyName"], data["eventId"], data["token"], data["url"]
         )
+
+    elif email_type == "EVENT_INVITATION":
+        send_event_invitation(email_field, data["fullName"], data["eventTitle"], data["url"])
 
     elif email_type == "REQUEST_OTP":
         send_request_otp(email_field, data["otp"], event_image_url=data.get("eventImageUrl"))

@@ -3,7 +3,7 @@
 # ║   CONTENU FIGÉ DES ÉDITIONS — DONNÉES UNIQUEMENT             ║
 # ║                                                              ║
 # ║   Partenaires et sponsors des emails propres à un événement  ║
-# ║   (RJP 2026, Madagascar PostgreSQL Conference 2026). Aucun   ║
+# ║   (Rencontre Géopolitique de l'Océan Indien 2026, Madagascar PostgreSQL Conference 2026). Aucun   ║
 # ║   HTML : templates/email.html affiche ces sections.          ║
 # ║                                                              ║
 # ║   Une cellule est soit un logo ("img" = fichier de           ║
@@ -15,9 +15,9 @@
 
 from templates_handler import asset_uri
 
-RJP_PATRONAGE = "Sous le haut parrainage de S.E.M. RAJAONARISON Mamitiana, Premier Ministre de la R&eacute;publique de Madagascar"
+RGOI_PATRONAGE = "Sous le haut parrainage de S.E.M. RAJAONARISON Mamitiana, Premier Ministre de la R&eacute;publique de Madagascar"
 
-RJP_SPONSORS = [
+RGOI_SPONSORS = [
   {
     "title": "Nos partenaires institutionnels",
     "blocks": [

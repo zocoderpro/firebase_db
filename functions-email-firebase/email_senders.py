@@ -11,6 +11,7 @@
 import html
 import logging
 import os
+import uuid
 from datetime import datetime
 
 from config import APP_BASE_URL, SMTP_USER
@@ -450,6 +451,55 @@ def send_participant_invitation_unknown(
 
     _send_email(msg)
     logging.info(f"Email invitation (unknown) envoyé à {company_email}")
+
+
+def send_event_invitation(email: str, full_name: str, event_title: str, url: str) -> None:
+    """Invitation nominative à s'inscrire à un événement (bouton « Confirmer ma participation »)."""
+    if not email or '@' not in email:
+        logging.error(f"Email invalide: '{email}'")
+        raise ValueError(f"Email invalide: {email}")
+
+    safe_full_name = html.escape(full_name or "")
+    safe_event_title = html.escape(event_title or "")
+    safe_url = html.escape(url or "", quote=True)
+
+    html_content = render_email(
+        PREHEADER=f"Vous êtes invité(e) — {safe_event_title}",
+        EYEBROW="Invitation",
+        TITLE="Vous êtes invité(e)",
+        SUBTITLE=safe_event_title,
+        GREETING=f"Bonjour {safe_full_name},",
+        INTRO=(
+            "Nous avons le plaisir de vous convier à l'événement "
+            f"<strong>{safe_event_title}</strong>. "
+            "Votre présence nous honorerait : confirmez dès maintenant votre "
+            "participation en quelques instants."
+        ),
+        CTA_URL=safe_url,
+        CTA_LABEL="Confirmer ma participation",
+        NOTE_END=(
+            "Si le bouton ne s'affiche pas, copiez ce lien dans votre navigateur : "
+            f"{safe_url}"
+        ),
+        SIGN_OFF="Cordialement,",
+    )
+
+    msg = _build_message(
+        subject=f"Invitation — {event_title}",
+        to_addr=email,
+        text_content=(
+            f"Bonjour {full_name},\n\n"
+            f"Vous êtes invité(e) à l'événement « {event_title} ».\n\n"
+            f"Confirmer ma participation : {url}\n\n"
+            "Cordialement,\nL'équipe Athena Event"
+        ),
+        html_content=html_content,
+        reply_to=SMTP_USER,
+        message_id=f"<{uuid.uuid4().hex}@athena-event.com>",
+    )
+
+    _send_email(msg)
+    logging.info(f"Email invitation événement envoyé à {email}")
 
 
 def send_activation_link_organizer(

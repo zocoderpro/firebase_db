@@ -12,7 +12,7 @@
 import html
 from datetime import datetime
 
-from event_content import PG_SPONSORS, RJP_PATRONAGE, RJP_SPONSORS, sections_ctx
+from event_content import PG_SPONSORS, RGOI_PATRONAGE, RGOI_SPONSORS, sections_ctx
 from templates_handler import asset_uri, footer_links, render_email
 
 
@@ -130,7 +130,7 @@ def _second_confirmation(data: dict) -> str:
 # 5 — EVENT_THANK_YOU (Rencontre Géopolitique de l'Océan Indien 2026)
 # ──────────────────────────────────────────────────────────────
 
-def _thank_you_rjp(data: dict) -> str:
+def _thank_you_rgoi(data: dict) -> str:
     return render_email(
         PREHEADER="Deux jours d'échanges pour l'avenir de notre région — merci d'en avoir fait partie.",
         EYEBROW="Rencontre Géopolitique · Océan Indien",
@@ -150,8 +150,8 @@ def _thank_you_rjp(data: dict) -> str:
             {"LABEL": "Dates", "VALUE": _e(data.get("eventDateRange"))},
             {"LABEL": "Lieu", "VALUE": "Palais d'Andafiavaratra · Antananarivo"},
         ],
-        PATRONAGE=RJP_PATRONAGE,
-        SECTIONS=sections_ctx(RJP_SPONSORS),
+        PATRONAGE=RGOI_PATRONAGE,
+        SECTIONS=sections_ctx(RGOI_SPONSORS),
         SIGN_OFF="Bien à vous,",
         SIGNATURE="Les organisateurs",
         SIGNATURE_SUB="Club 1808 &nbsp;&middot;&nbsp; Institut Diplomatique de Paris (IDP)",
@@ -370,7 +370,7 @@ BUILDERS = {
     2: _brochure,            # Modern Professional     │ les trois numéros restent
     3: _brochure,            # Business Professional   ┘ acceptés par le backend
     4: _second_confirmation, # Confirmation d'inscription événementielle
-    5: _thank_you_rjp,       # Remerciement post-événement (RJP 2026)
+    5: _thank_you_rgoi,       # Remerciement post-événement (Rencontre Géopolitique 2026)
     6: _contact_request,     # Demandes de mise en relation
     7: _contact_accepted,    # Acceptation d'une mise en relation
     8: _pg_reminder,         # Rappel J-1 (PostgreSQL Conference 2026)
