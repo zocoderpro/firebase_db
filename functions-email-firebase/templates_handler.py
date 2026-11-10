@@ -26,6 +26,9 @@ from functools import lru_cache
 from config import BRAND_KICKER, BRAND_NAME, LOGO_URL
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "templates", "email.html")
+GEM_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "templates", "gem_event_invitation.html")
+GEM_CHEQUE_RECEIVED_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "templates", "GEM_CHEQUE", "cheque_received.html")
+GEM_CHEQUE_ADMIN_NOTICE_TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "templates", "GEM_CHEQUE", "cheque_admin_notice.html")
 
 # Texte invisible de padding pour le preheader — force les clients email
 # à ne pas afficher le début du corps de l'email dans l'aperçu.
@@ -86,3 +89,67 @@ def render_email(**ctx) -> str:
         ctx[f"ALERT_{kind.upper()}"] = True
         ctx["ALERT_ANY"] = True
     return _render(_load_template(), ctx)
+
+
+@lru_cache(maxsize=1)
+def _load_gem_template() -> str:
+    with open(GEM_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+@lru_cache(maxsize=1)
+def _load_gem_cheque_received_template() -> str:
+    with open(GEM_CHEQUE_RECEIVED_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+@lru_cache(maxsize=1)
+def _load_gem_cheque_admin_notice_template() -> str:
+    with open(GEM_CHEQUE_ADMIN_NOTICE_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+def render_gem_invitation(**ctx) -> str:
+    """Rend templates/gem_event_invitation.html avec les données fournies en kwargs (clés en MAJUSCULES).
+
+    Valeurs injectées telles quelles : l'appelant échappe (html.escape) tout champ
+    venant du backend avant de le passer.
+    """
+    ctx.setdefault("DOC_TITLE", "Invitation GEM")
+    ctx.setdefault("YEAR", datetime.now().year)
+    ctx.setdefault("PREHEADER_FILLER", _PREHEADER_FILLER)
+    return _render(_load_gem_template(), ctx)
+
+
+def render_gem_cheque_received(**ctx) -> str:
+    """Rend templates/GEM_CHEQUE/cheque_received.html avec les données fournies en kwargs (clés en MAJUSCULES).
+
+    Valeurs injectées telles quelles : l'appelant échappe (html.escape) tout champ
+    venant du backend avant de le passer.
+    """
+    ctx.setdefault("DOC_TITLE", "Confirmation réception chèque")
+    ctx.setdefault("YEAR", datetime.now().year)
+    ctx.setdefault("PREHEADER_FILLER", _PREHEADER_FILLER)
+    # ALERT_KIND="warning|danger|ok" → drapeaux ALERT_WARNING / ALERT_DANGER / ALERT_OK
+    kind = ctx.get("ALERT_KIND")
+    if kind:
+        ctx[f"ALERT_{kind.upper()}"] = True
+        ctx["ALERT_ANY"] = True
+    return _render(_load_gem_cheque_received_template(), ctx)
+
+
+def render_gem_cheque_admin_notice(**ctx) -> str:
+    """Rend templates/GEM_CHEQUE/cheque_admin_notice.html avec les données fournies en kwargs (clés en MAJUSCULES).
+
+    Valeurs injectées telles quelles : l'appelant échappe (html.escape) tout champ
+    venant du backend avant de le passer.
+    """
+    ctx.setdefault("DOC_TITLE", "Notification chèque GEM")
+    ctx.setdefault("YEAR", datetime.now().year)
+    ctx.setdefault("PREHEADER_FILLER", _PREHEADER_FILLER)
+    # ALERT_KIND="warning|danger|ok" → drapeaux ALERT_WARNING / ALERT_DANGER / ALERT_OK
+    kind = ctx.get("ALERT_KIND")
+    if kind:
+        ctx[f"ALERT_{kind.upper()}"] = True
+        ctx["ALERT_ANY"] = True
+    return _render(_load_gem_cheque_admin_notice_template(), ctx)

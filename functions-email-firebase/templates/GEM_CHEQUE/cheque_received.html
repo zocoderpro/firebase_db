@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:v="urn:schemas-microsoft-com:vml"
+      xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>{{DOC_TITLE}}</title>
+<!--[if mso]>
+<noscript><xml><o:OfficeDocumentSettings>
+  <o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings></xml></noscript>
+<style>td,div,p,a,span{font-family:'Century Gothic',Arial,sans-serif !important;}</style>
+<![endif]-->
+<style>
+  /* Confirmation réception chèque — GEM
+     Charte GEM : Bleu nuit #0A223F · Vert #018442 · Rouge #EF443E · Blanc
+     Typographie : Geometria → Montserrat → Century Gothic → Arial
+     Image intégrée : cid:gemlogo (templates/gemlogo.png, jointe par send_gem_cheque_received) */
+  body, table, td, a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+  table, td           { mso-table-lspace:0pt; mso-table-rspace:0pt; }
+  img                 { -ms-interpolation-mode:bicubic; border:0; display:block; }
+  a                   { text-decoration:none; }
+
+  @media only screen and (max-width:680px) {
+    .outer-td  { padding:0 !important; }
+    .shell     { width:100% !important; min-width:100% !important; }
+    .head-td   { padding:22px 20px !important; }
+    .head-col  { display:block !important; width:100% !important; text-align:left !important; }
+    .head-col-r{ padding-top:14px !important; }
+    .hero-td   { padding:28px 20px 26px 20px !important; }
+    .hero-h1   { font-size:24px !important; line-height:29px !important; }
+    .panel-td  { padding:28px 20px 30px 20px !important; }
+    .info-td   { display:block !important; width:100% !important; padding:0 0 10px 0 !important; }
+    .btn-td    { display:block !important; width:100% !important; padding:0 0 10px 0 !important; }
+    .btn-a     { display:block !important; text-align:center !important; }
+    .footer-td { padding:24px 20px !important; }
+    .below-td  { padding:14px 16px 0 !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#F2F3F5;word-spacing:normal;">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;color:#F2F3F5;line-height:1px;">{{PREHEADER}}{{PREHEADER_FILLER}}</div>
+
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#F2F3F5;">
+<tr>
+<td class="outer-td" align="center" style="padding:28px 16px;">
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="shell" style="width:680px;max-width:680px;background-color:#FFFFFF;">
+
+    <!-- ══════════ EN-TÊTE : logo GEM ══════════ -->
+    <tr>
+      <td class="head-td" style="background-color:#FFFFFF;padding:26px 40px 22px 40px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td class="head-col" align="left" valign="middle">
+            <img src="cid:gemlogo" width="150" height="87" alt="GEM — Groupement des Entreprises de Madagascar"
+                 style="display:block;border:0;outline:none;text-decoration:none;width:150px;height:87px;" />
+          </td>
+          <td class="head-col head-col-r" align="right" valign="middle" style="text-align:right;font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#0A223F;line-height:1.7;">
+            Confirmation de paiement<br/>
+            <span style="font-weight:500;color:#4A5568;letter-spacing:1.5px;">Chèque reçu</span>
+          </td>
+        </tr></table>
+      </td>
+    </tr>
+
+    <!-- ══════════ BANDEAU ÉVÉNEMENT ══════════ -->
+    <tr>
+      <td class="hero-td" bgcolor="#0A223F" style="background-color:#0A223F;padding:36px 40px 34px 40px;">
+        <!--IF:EVENT_DATE_LOCATION-->
+        <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#FFFFFF;line-height:1.6;">{{EVENT_DATE_LOCATION}}</div>
+        <!--/IF:EVENT_DATE_LOCATION-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:12px 0 0 0;">
+          <tr>
+            <td width="28" style="width:28px;height:3px;background-color:#018442;font-size:0;line-height:3px;">&nbsp;</td>
+            <td width="14" style="width:14px;height:3px;background-color:#EF443E;font-size:0;line-height:3px;">&nbsp;</td>
+          </tr>
+        </table>
+        <!--IF:EVENT_TITLE-->
+        <div class="hero-h1" style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:30px;font-weight:700;line-height:36px;color:#FFFFFF;padding-top:14px;">{{EVENT_TITLE}}</div>
+        <!--/IF:EVENT_TITLE-->
+      </td>
+    </tr>
+    <tr>
+      <td style="font-size:0;line-height:0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td width="66%" style="height:4px;background-color:#018442;font-size:0;line-height:4px;">&nbsp;</td>
+          <td width="34%" style="height:4px;background-color:#EF443E;font-size:0;line-height:4px;">&nbsp;</td>
+        </tr></table>
+      </td>
+    </tr>
+
+    <!-- ══════════ CONTENU ══════════ -->
+    <tr>
+      <td class="panel-td" style="background-color:#FFFFFF;padding:38px 40px 36px 40px;">
+
+        <!-- Salutation -->
+        <!--IF:SALUTATION-->
+        <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:19px;font-weight:600;line-height:1.35;color:#0A223F;padding-bottom:12px;">{{SALUTATION}}</div>
+        <!--/IF:SALUTATION-->
+
+        <!-- Texte d'intro -->
+        <!--IF:INTRO_TEXT-->
+        <p style="margin:0 0 16px 0;font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:15px;line-height:1.75;color:#4A5568;">
+          {{INTRO_TEXT}}
+        </p>
+        <!--/IF:INTRO_TEXT-->
+
+        <!-- Carte détails paiement -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:10px 0 26px 0;">
+          <tr>
+            <td style="border:1px solid #DADDE3;border-top:4px solid #0A223F;padding:20px 22px;">
+              <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#018442;">Détails du paiement reçu</div>
+              <!--IF:COMPANY-->
+              <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:20px;font-weight:700;line-height:1.3;color:#0A223F;padding-top:8px;">{{COMPANY}}</div>
+              <!--/IF:COMPANY-->
+              <!--IF:PHONE--><div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:14px;line-height:1.5;color:#4A5568;padding-top:2px;">Tél : {{PHONE}}</div><!--/IF:PHONE-->
+              <!--IF:EVENT_TITLE--><div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#0A223F;padding-top:4px;">{{EVENT_TITLE}}</div><!--/IF:EVENT_TITLE-->
+            </td>
+          </tr>
+        </table>
+
+        <!-- Récapitulatif ligne par ligne -->
+        <!--IF:INFO_ROWS-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:0;">
+          <tr>
+            <td style="background-color:#F2F3F5;border-radius:12px;padding:20px 22px;">
+              <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#018442;padding-bottom:6px;">{{INFO_TITLE}}</div>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <!--EACH:INFO_ROWS-->
+                <tr>
+                  <td valign="top" style="padding:6px 0;font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:15px;line-height:1.4;color:#4A556B;vertical-align:top;">{{LABEL}}</td>
+                  <td valign="top" align="right" style="padding:6px 0 6px 12px;font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:15px;line-height:1.4;font-weight:600;color:#0A223F;text-align:right;vertical-align:top;"><!--IF:MONO--><span style="font-family:ui-monospace,'Courier New',Courier,monospace;font-size:14px;letter-spacing:.04em;background-color:#F2F3F5;border-radius:4px;padding:2px 8px;">{{VALUE}}</span><!--/IF:MONO--><!--IFNOT:MONO-->{{VALUE}}<!--/IFNOT:MONO--></td>
+                </tr>
+                <!--/EACH:INFO_ROWS-->
+              </table>
+            </td>
+          </tr>
+        </table>
+        <div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>
+        <!--/IF:INFO_ROWS-->
+
+        <!-- Encadré confirmation (vert) -->
+        <!--IF:ALERT_OK-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:0;">
+          <tr>
+            <td style="background-color:#E8F4EC;border-radius:12px;padding:16px 18px;border-left:4px solid #018442;">
+              <!--IF:ALERT_TITLE-->
+              <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0A223F;padding-bottom:6px;">{{ALERT_TITLE}}</div>
+              <!--/IF:ALERT_TITLE-->
+              <!--IF:ALERT_TEXT-->
+              <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:14px;line-height:1.6;color:#0A223F;">{{ALERT_TEXT}}</div>
+              <!--/IF:ALERT_TEXT-->
+            </td>
+          </tr>
+        </table>
+        <div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>
+        <!--/IF:ALERT_OK-->
+
+        <!-- Formule de politesse + signature -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top:30px;">
+          <tr>
+            <td width="28" style="width:28px;height:2px;background-color:#018442;font-size:1px;line-height:1px;">&nbsp;</td>
+            <td width="14" style="width:14px;height:2px;background-color:#EF443E;font-size:1px;line-height:1px;">&nbsp;</td>
+            <td style="height:2px;font-size:1px;line-height:1px;">&nbsp;</td>
+          </tr>
+        </table>
+        <p style="margin:18px 0 0 0;font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:15px;line-height:1.7;color:#4A5568;">
+          Nous restons à votre disposition pour toute information complémentaire.
+        </p>
+        <p style="margin:18px 0 0 0;font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:15px;line-height:1.5;color:#0A223F;">
+          Cordialement,<br/>
+          <span style="font-size:13px;color:#4A5568;">L'équipe Athena Event pour le GEM</span><br/>
+          <span style="font-size:13px;color:#4A5568;">Groupement des Entreprises de Madagascar</span>
+        </p>
+
+      </td>
+    </tr>
+
+    <!-- ══════════ PIED DE PAGE ══════════ -->
+    <tr>
+      <td class="footer-td" bgcolor="#0A223F" style="background-color:#0A223F;padding:28px 36px;text-align:center;">
+        <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:14px;font-weight:500;letter-spacing:1px;color:#FFFFFF;padding-bottom:14px;">Connect. Measure. Grow.</div>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center">
+          <tr><td style="width:36px;height:2px;background-color:#018442;font-size:0;line-height:2px;">&nbsp;</td></tr>
+        </table>
+        <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:12px;color:#C9D2E0;padding-top:14px;padding-bottom:12px;line-height:1.9;">
+          <a href="tel:+261****4613" style="color:#C9D2E0;text-decoration:none;">+261 38 32 046 13</a>
+          &nbsp;<span style="color:#EF443E;">&middot;</span>&nbsp;
+          <a href="mailto:sales@athena-event.com" style="color:#C9D2E0;text-decoration:none;">sales@athena-event.com</a>
+          &nbsp;<span style="color:#EF443E;">&middot;</span>&nbsp;
+          <a href="https://www.athena-event.com" style="color:#C9D2E0;text-decoration:none;">www.athena-event.com</a>
+        </div>
+        <div style="font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:11px;line-height:16px;color:#8A97AB;">
+          &copy; {{YEAR}} Athena Event by Clearmind-Analytics &mdash; Antananarivo, Madagascar
+        </div>
+      </td>
+    </tr>
+
+  </table>
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:680px;">
+    <tr>
+      <td class="below-td" align="center" style="padding:14px 32px 0;font-family:Geometria,Montserrat,'Century Gothic',Arial,sans-serif;font-size:11px;line-height:1.6;color:#6B7585;text-align:center;">
+        Cet email a été envoyé automatiquement par la plateforme Athena Event.<br>
+        Merci de ne pas y répondre directement.
+      </td>
+    </tr>
+  </table>
+
+</td>
+</tr>
+</table>
+</body>
+</html>

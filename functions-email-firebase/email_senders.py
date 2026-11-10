@@ -14,9 +14,9 @@ import os
 import uuid
 from datetime import datetime
 
-from config import APP_BASE_URL, SMTP_USER
+from config import APP_BASE_URL, SMTP_USER, GEM_LOGO_URL
 from sender import _build_message, _send_email, _format_expiry
-from templates_handler import render_email
+from templates_handler import render_email, render_gem_invitation, render_gem_cheque_received, render_gem_cheque_admin_notice
 
 
 def _row(label: str, value: str, mono: bool = False) -> dict:
@@ -453,53 +453,131 @@ def send_participant_invitation_unknown(
     logging.info(f"Email invitation (unknown) envoyé à {company_email}")
 
 
-def send_event_invitation(email: str, full_name: str, event_title: str, url: str) -> None:
-    """Invitation nominative à s'inscrire à un événement (bouton « Confirmer ma participation »)."""
+def send_event_invitation(
+    email: str,
+    full_name: str,
+    event_title: str,
+    url: str,
+    first_name: str = "",
+    last_name: str = "",
+    sexe: str = "",
+    institution: str = "",
+    role: str = "",
+    event_date_location: str = "",
+    event_subtitle: str = "",
+    program_connect_title: str = "",
+    program_connect_time: str = "",
+    program_regem_title: str = "",
+    program_regem_time: str = "",
+    rsvp_text: str = "",
+    confirmation_text: str = "",
+    contact_line: str = "",
+    signatory_name: str = "",
+    signatory_title: str = "",
+    include_paper_note: bool = False,
+) -> None:
+    """Invitation nominative à un événement GEM (template institutionnel)."""
     if not email or '@' not in email:
         logging.error(f"Email invalide: '{email}'")
         raise ValueError(f"Email invalide: {email}")
 
     safe_full_name = html.escape(full_name or "")
+    safe_first_name = html.escape(first_name or "")
+    safe_last_name = html.escape(last_name or "")
     safe_event_title = html.escape(event_title or "")
     safe_url = html.escape(url or "", quote=True)
+    safe_event_date_location = html.escape(event_date_location or "")
+    safe_event_subtitle = html.escape(event_subtitle or "")
+    safe_program_connect_title = html.escape(program_connect_title or "")
+    safe_program_connect_time = html.escape(program_connect_time or "")
+    safe_program_regem_title = html.escape(program_regem_title or "")
+    safe_program_regem_time = html.escape(program_regem_time or "")
+    safe_rsvp_text = html.escape(rsvp_text or "")
+    safe_confirmation_text = html.escape(confirmation_text or "")
+    safe_contact_line = html.escape(contact_line or "")
+    safe_signatory_name = html.escape(signatory_name or "")
+    safe_signatory_title = html.escape(signatory_title or "")
+    safe_institution = html.escape(institution or "")
+    safe_role = html.escape(role or "")
 
-    html_content = render_email(
-        PREHEADER=f"Vous êtes invité(e) — {safe_event_title}",
-        EYEBROW="Invitation",
-        TITLE="Vous êtes invité(e)",
-        SUBTITLE=safe_event_title,
-        GREETING=f"Bonjour {safe_full_name},",
-        INTRO=(
-            "Nous avons le plaisir de vous convier à l'événement "
-            f"<strong>{safe_event_title}</strong>. "
-            "Votre présence nous honorerait : confirmez dès maintenant votre "
-            "participation en quelques instants."
+    # Construire la salutation selon le sexe
+    if sexe.upper() == "F":
+        salutation = f"Madame {safe_first_name} {safe_last_name},"
+    elif sexe.upper() == "M":
+        salutation = f"Monsieur {safe_first_name} {safe_last_name},"
+    else:
+        salutation = f"Bonjour {safe_full_name},"
+
+    # Carte de l'invité
+    guest_title = ""
+    if safe_role:
+        guest_title = safe_role
+    if safe_institution:
+        guest_org = safe_institution
+    else:
+        guest_org = ""
+
+    html_content = render_gem_invitation(
+        PREHEADER=f"Invitation officielle — {safe_event_title}",
+        EVENT_DATE_LOCATION=safe_event_date_location,
+        EVENT_TITLE=safe_event_title,
+        EVENT_SUBTITLE=safe_event_subtitle,
+        SALUTATION=salutation,
+        INTRO_TEXT=(
+            "Le Président du <strong style=\"color:#0A223F;\">Groupement des Entreprises de Madagascar</strong> "
+            "a l'honneur de vous inviter à "
+            f"<strong style=\"color:#0A223F;\">{safe_event_title}</strong>, "
+            f"placé sous le thème <em>«&nbsp;{safe_event_subtitle}&nbsp;»</em>."
+        ) if safe_event_subtitle else (
+            "Le Président du <strong style=\"color:#0A223F;\">Groupement des Entreprises de Madagascar</strong> "
+            f"a l'honneur de vous inviter à <strong style=\"color:#0A223F;\">{safe_event_title}</strong>."
         ),
-        CTA_URL=safe_url,
-        CTA_LABEL="Confirmer ma participation",
-        NOTE_END=(
-            "Si le bouton ne s'affiche pas, copiez ce lien dans votre navigateur : "
-            f"{safe_url}"
+        PAPER_NOTE=include_paper_note,
+        GUEST_NAME=f"{safe_first_name} {safe_last_name}".strip(),
+        GUEST_TITLE=guest_title,
+        GUEST_ORG=guest_org,
+        PROGRAM_CONNECT_TITLE=safe_program_connect_title,
+        PROGRAM_CONNECT_TIME=safe_program_connect_time,
+        PROGRAM_REGEM_TITLE=safe_program_regem_title,
+        PROGRAM_REGEM_TIME=safe_program_regem_time,
+        RSVP_TEXT=safe_rsvp_text or (
+            "Nous vous serions reconnaissants de bien vouloir nous faire part de votre réponse. "
+            "Le bouton ci-dessous vous permet de confirmer votre présence et de choisir l'atelier "
+            "auquel vous souhaitez participer, dans la limite des places disponibles, "
+            "ou de nous indiquer que vous ne pourrez pas être présent(e)."
         ),
-        SIGN_OFF="Cordialement,",
+        RSVP_URL=safe_url,
+        CONFIRMATION_TEXT=safe_confirmation_text or (
+            "Une fois votre présence confirmée, votre <strong>pass d'accès personnel</strong> "
+            "avec QR code vous sera adressé par e-mail. Il vous suffira de le présenter à "
+            "l'accueil protocolaire."
+        ),
+        CONTACT_LINE=safe_contact_line,
+        SIGNATORY_NAME=safe_signatory_name,
+        SIGNATORY_TITLE=safe_signatory_title,
     )
 
     msg = _build_message(
-        subject=f"Invitation — {event_title}",
-        to_addr=email,
-        text_content=(
-            f"Bonjour {full_name},\n\n"
-            f"Vous êtes invité(e) à l'événement « {event_title} ».\n\n"
-            f"Confirmer ma participation : {url}\n\n"
-            "Cordialement,\nL'équipe Athena Event"
-        ),
-        html_content=html_content,
-        reply_to=SMTP_USER,
-        message_id=f"<{uuid.uuid4().hex}@athena-event.com>",
-    )
+            subject=f"Invitation officielle — {event_title}",
+            to_addr=email,
+            text_content=(
+                f"{salutation}\n\n"
+                f"Le Président du Groupement des Entreprises de Madagascar a l'honneur de vous inviter à "
+                f"« {event_title} ».\n\n"
+                f"Répondre à l'invitation : {url}\n\n"
+                "Dans l'attente du plaisir de vous accueillir, nous vous prions d'agréer l'expression de "
+                "notre haute considération.\n\n"
+                f"{signatory_name}\n{signatory_title}\nGroupement des Entreprises de Madagascar"
+            ),
+            html_content=html_content,
+            reply_to=SMTP_USER,
+            message_id=f"<{uuid.uuid4().hex}@athena-event.com>",
+            logo_type="gem",
+            from_name="Athena Event",
+        )
 
     _send_email(msg)
-    logging.info(f"Email invitation événement envoyé à {email}")
+    logging.info(f"Email invitation GEM envoyé à {email}")
 
 
 def send_activation_link_organizer(
@@ -682,3 +760,156 @@ def send_request_otp(destinataire: str, otp: str, event_image_url: str = None) -
 
     _send_email(msg)
     logging.info(f"Email OTP envoyé à {destinataire}")
+
+
+# ──────────────────────────────────────────────────────────────
+# GEM CHEQUE EMAILS
+# ──────────────────────────────────────────────────────────────
+
+def send_gem_cheque_received(
+    email: str,
+    phone: str,
+    company: str,
+    event_title: str,
+    ticket_count: int,
+    total_amount: int,
+) -> None:
+    """Email client : confirmation que son chèque a été reçu (template GEM)."""
+    if not email or '@' not in email:
+        logging.error(f"Email invalide: '{email}'")
+        raise ValueError(f"Email invalide: {email}")
+
+    safe_email = html.escape(email or "")
+    safe_phone = html.escape(phone or "")
+    safe_company = html.escape(company or "")
+    safe_event_title = html.escape(event_title or "")
+    safe_ticket_count = str(ticket_count)
+    safe_total_amount = f"{total_amount:,.0f}".replace(",", " ") + " Ar"
+
+    html_content = render_gem_cheque_received(
+        PREHEADER=f"Confirmation réception chèque — {safe_event_title}",
+        SALUTATION="Bonjour,",
+        INTRO_TEXT=(
+            "Nous avons bien reçu votre règlement par chèque pour l'événement "
+            f"<strong>{safe_event_title}</strong>. Votre réservation est désormais confirmée."
+        ),
+        COMPANY=safe_company,
+        PHONE=safe_phone,
+        EVENT_TITLE=safe_event_title,
+        INFO_TITLE="Récapitulatif du paiement",
+        INFO_ROWS=[
+            {"LABEL": "Entreprise", "VALUE": safe_company},
+            {"LABEL": "Téléphone", "VALUE": safe_phone},
+            {"LABEL": "Nombre de billets", "VALUE": safe_ticket_count},
+            {"LABEL": "Montant total", "VALUE": safe_total_amount, "MONO": True},
+            {"LABEL": "Événement", "VALUE": safe_event_title},
+        ],
+        ALERT_KIND="ok",
+        ALERT_TITLE="Prochaines étapes",
+        ALERT_TEXT=(
+            "Vos billets vous seront envoyés par email sous peu. "
+            "Merci de conserver cet email comme preuve de paiement."
+        ),
+    )
+
+    msg = _build_message(
+        subject=f"Confirmation réception chèque — {event_title}",
+        to_addr=email,
+        text_content=(
+            f"Athena Event — Confirmation réception chèque\n\n"
+            f"Bonjour,\n\n"
+            f"Nous avons bien reçu votre règlement par chèque pour l'événement : {event_title}\n\n"
+            f"DÉTAILS DU PAIEMENT\n"
+            f"Entreprise      : {company}\n"
+            f"Téléphone       : {phone}\n"
+            f"Nombre de billets : {ticket_count}\n"
+            f"Montant total   : {total_amount:,.0f} Ar\n\n"
+            f"Vos billets vous seront envoyés par email sous peu.\n\n"
+            f"Cordialement,\nL'équipe Athena Event"
+        ),
+        html_content=html_content,
+        reply_to=SMTP_USER,
+        message_id=f"<cheque-received-{uuid.uuid4().hex}@athena-event.com>",
+        logo_type="gem",
+        from_name="Athena Event",
+    )
+
+    _send_email(msg)
+    logging.info(f"Email cheque received envoyé à {email}")
+
+
+def send_gem_cheque_admin_notice(
+    admin_email: str,
+    client_email: str,
+    phone: str,
+    company: str,
+    event_title: str,
+    ticket_count: int,
+    total_amount: int,
+) -> None:
+    """Email équipe GEM : notification nouveau paiement par chèque (template GEM)."""
+    if not admin_email or '@' not in admin_email:
+        logging.error(f"Email admin invalide: '{admin_email}'")
+        raise ValueError(f"Email admin invalide: {admin_email}")
+
+    safe_admin_email = html.escape(admin_email or "")
+    safe_client_email = html.escape(client_email or "")
+    safe_phone = html.escape(phone or "")
+    safe_company = html.escape(company or "")
+    safe_event_title = html.escape(event_title or "")
+    safe_ticket_count = str(ticket_count)
+    safe_total_amount = f"{total_amount:,.0f}".replace(",", " ") + " Ar"
+
+    html_content = render_gem_cheque_admin_notice(
+        PREHEADER=f"Nouveau paiement chèque — {safe_event_title}",
+        SALUTATION="Bonjour,",
+        INTRO_TEXT=(
+            "Un nouveau paiement par chèque vient d'être enregistré sur la plateforme. "
+            "Voici les détails de la transaction :"
+        ),
+        CLIENT_EMAIL=safe_client_email,
+        PHONE=safe_phone,
+        COMPANY=safe_company,
+        EVENT_TITLE=safe_event_title,
+        INFO_TITLE="Détails de la transaction",
+        INFO_ROWS=[
+            {"LABEL": "Client", "VALUE": safe_client_email},
+            {"LABEL": "Téléphone", "VALUE": safe_phone},
+            {"LABEL": "Entreprise", "VALUE": safe_company},
+            {"LABEL": "Nombre de billets", "VALUE": safe_ticket_count},
+            {"LABEL": "Montant total", "VALUE": safe_total_amount, "MONO": True},
+            {"LABEL": "Événement", "VALUE": safe_event_title},
+        ],
+        ALERT_KIND="warning",
+        ALERT_TITLE="Action requise",
+        ALERT_TEXT=(
+            "<strong>Merci de vérifier l'encaissement du chèque</strong> et de "
+            "valider la réservation dans le back-office si le chèque est honoré."
+        ),
+    )
+
+    msg = _build_message(
+        subject=f"[ADMIN] Nouveau chèque — {event_title} ({company})",
+        to_addr=admin_email,
+        text_content=(
+            f"Athena Event — Notification paiement chèque\n\n"
+            f"Un nouveau paiement par chèque a été enregistré.\n\n"
+            f"DÉTAILS DE LA TRANSACTION\n"
+            f"Client          : {client_email}\n"
+            f"Téléphone       : {phone}\n"
+            f"Entreprise      : {company}\n"
+            f"Nombre de billets : {ticket_count}\n"
+            f"Montant total   : {total_amount:,.0f} Ar\n"
+            f"Événement       : {event_title}\n\n"
+            f"Merci de vérifier l'encaissement du chèque.\n\n"
+            f"Cordialement,\nL'équipe Athena Event"
+        ),
+        html_content=html_content,
+        reply_to=SMTP_USER,
+        message_id=f"<cheque-admin-{uuid.uuid4().hex}@athena-event.com>",
+        logo_type="gem",
+        from_name="Athena Event",
+    )
+
+    _send_email(msg)
+    logging.info(f"Email cheque admin notice envoyé à {admin_email} (client: {client_email})")

@@ -15,6 +15,8 @@ from email_senders import (
     send_request_otp,
     send_event_voucher,
     send_event_invitation,
+    send_gem_cheque_received,
+    send_gem_cheque_admin_notice,
 )
 
 # Initialiser Firebase Admin
@@ -23,7 +25,6 @@ try:
     get_app()
 except ValueError:
     initialize_app()
-
 
 
 # ╔══════════════════════════════════════════════════════════════╗
@@ -106,6 +107,24 @@ def process_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -
     elif email_type == "EVENT_INVITATION":
         required_fields = ["type", "email", "fullName", "eventTitle", "url"]
         email_field = data.get("email", "")
+        # Nouveaux champs optionnels pour le template GEM
+        first_name = data.get("firstName", "")
+        last_name = data.get("lastName", "")
+        sexe = data.get("sexe", "")
+        institution = data.get("institution", "")
+        role = data.get("role", "")
+        event_date_location = data.get("eventDateLocation", "")
+        event_subtitle = data.get("eventSubtitle", "")
+        program_connect_title = data.get("programConnectTitle", "")
+        program_connect_time = data.get("programConnectTime", "")
+        program_regem_title = data.get("programRegemTitle", "")
+        program_regem_time = data.get("programRegemTime", "")
+        rsvp_text = data.get("rsvpText", "")
+        confirmation_text = data.get("confirmationText", "")
+        contact_line = data.get("contactLine", "")
+        signatory_name = data.get("signatoryName", "")
+        signatory_title = data.get("signatoryTitle", "")
+        include_paper_note = data.get("includePaperNote", False)
 
     elif email_type == "REQUEST_OTP":
         email_field = data.get("destinataire", "")
@@ -115,6 +134,16 @@ def process_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -
         required_fields = ["type", "email", "voucherCode"]
         email_field = data.get("email", "")
         logging.info(f"Email voucher: '{email_field}'")
+
+    elif email_type == "GEM_CHEQUE_RECEIVED":
+        required_fields = ["type", "email", "phone", "company", "eventTitle", "ticketCount", "totalAmount"]
+        email_field = data.get("email", "")
+        logging.info(f"Gem cheque received: '{email_field}'")
+
+    elif email_type == "GEM_CHEQUE_ADMIN_NOTICE":
+        required_fields = ["type", "email", "clientEmail", "phone", "company", "eventTitle", "ticketCount", "totalAmount"]
+        email_field = data.get("email", "")
+        logging.info(f"Gem cheque admin notice: '{email_field}'")
 
     else:
         logging.warning(f"Type inconnu: {email_type}")
@@ -188,10 +217,53 @@ def process_email(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData]) -
         )
 
     elif email_type == "EVENT_INVITATION":
-        send_event_invitation(email_field, data["fullName"], data["eventTitle"], data["url"])
+        send_event_invitation(
+            email_field,
+            data["fullName"],
+            data["eventTitle"],
+            data["url"],
+            first_name=first_name,
+            last_name=last_name,
+            sexe=sexe,
+            institution=institution,
+            role=role,
+            event_date_location=event_date_location,
+            event_subtitle=event_subtitle,
+            program_connect_title=program_connect_title,
+            program_connect_time=program_connect_time,
+            program_regem_title=program_regem_title,
+            program_regem_time=program_regem_time,
+            rsvp_text=rsvp_text,
+            confirmation_text=confirmation_text,
+            contact_line=contact_line,
+            signatory_name=signatory_name,
+            signatory_title=signatory_title,
+            include_paper_note=include_paper_note,
+        )
 
     elif email_type == "REQUEST_OTP":
         send_request_otp(email_field, data["otp"], event_image_url=data.get("eventImageUrl"))
 
     elif email_type == "EVENT_VOUCHER":
         send_event_voucher(email_field, data["voucherCode"])
+
+    elif email_type == "GEM_CHEQUE_RECEIVED":
+        send_gem_cheque_received(
+            email_field,
+            data["phone"],
+            data["company"],
+            data["eventTitle"],
+            data["ticketCount"],
+            data["totalAmount"],
+        )
+
+    elif email_type == "GEM_CHEQUE_ADMIN_NOTICE":
+        send_gem_cheque_admin_notice(
+            email_field,
+            data["clientEmail"],
+            data["phone"],
+            data["company"],
+            data["eventTitle"],
+            data["ticketCount"],
+            data["totalAmount"],
+        )

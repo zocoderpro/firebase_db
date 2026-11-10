@@ -8,6 +8,9 @@ import os
 # URL externe. Voir sender.py::_load_logo_image_part().
 LOGO_URL = "cid:logo"
 
+# Logo GEM — intégré en CID (assets/gemlogo.png), pour les invitations GEM
+GEM_LOGO_URL = "cid:gemlogo"
+
 # Marque affichée dans le bandeau d'en-tête de templates/email.html
 BRAND_NAME   = "Athena Event"
 BRAND_KICKER = "by Clearmind Analytics"
@@ -16,7 +19,7 @@ BRAND_KICKER = "by Clearmind Analytics"
 # ──────────────────────────────────────────────────────────────
 # CONFIG SMTP & APP
 # Centralisées ici — ne pas redéclarer dans chaque fonction
-# ──────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────
 
 SMTP_HOST     = os.environ.get("SMTP_HOST", "smtp.zeptomail.com")
 SMTP_PORT     = int(os.environ.get("SMTP_PORT", "587"))

@@ -29,6 +29,8 @@ pip install -r requirements.txt
 ```bash
 
  npx firebase emulators:start --project demo-event-app --import=./emulator-data --export-on-exit=./emulator-data
+ npx firebase emulators:start --project demo-event-app --import=./data_prod --export-on-exit=./data_prod
+ npx firebase emulators:start --project demo-event-app --import=./staging_data --export-on-exit=./staging_data
 ```
 
 # Créer les topics
@@ -71,21 +73,14 @@ mvn spring-boot:run
 
  ./mvnw spring-boot:run
 
-ngrok http --domain=overexert-gloomily-exchange.ngrok-free.dev 8080
+curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-registration-confirmed:publish"   -H "Content-Type: application/json"   -d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"EVENT_VOUCHER","email":"zaraalamadagascar@gmail.com","voucherCode":"XENNYSSX"}' | base64 -w0)\"}]}"  
 
-curl -X POST https://overexert-gloomily-exchange.ngrok-free.dev/webhook/messenger \
-  -H "Content-Type: application/json" \
-  -d '{
-    "entry": [{
-      "messaging": [{
-        "sender": { "id": "27135442052716717" },
-        "referral": { "ref": "1484107550130618" },
-        "message": { "text": "Bonjour" }
-      }]
-    }]
-  }'
+
+curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-registration-confirmed:publish"   -H "Content-Type: application/json"   -d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"EVENT_VOUCHER","email":"lovatiana.ramandraiarisoa@basan.mg","voucherCode":"C6TQVMJH"}' | base64 -w0)\"}]}"
+
+curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-registration-confirmed:publish"   -H "Content-Type: application/json"   -d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"EVENT_VOUCHER","email":"ramandimbiarison@basan.mg","voucherCode":"ZN9MF7JN"}' | base64 -w0)\"}]}"
+
+curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-registration-confirmed:publish"   -H "Content-Type: application/json"   -d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"EVENT_VOUCHER","email":"mahefa.ramandimbiarison@basan.mg","voucherCode":"5WU37RNR"}' | base64 -w0)\"}]}"
 
 
 
-curl "https://graph.facebook.com/v21.0/me/conversations?fields=participants&access_token=EAAVt8svNVyIBRtcaJHWGlBssKnRLuFL9c8U8I8ZCCVvZA51L4IWDhs0WNwwzVhK6u8FgEB5IvRZC7X18LEVYgTjIIge9c012rDckxODLV9woUltPuXi7kKLv3CCzYVRDhTUdg1gghvGH2IXAoGKyPu8L4sppfHZBia1RvsXKGh37GZBQew5pSc8zseVtFWFdf9ZAdKVgZDZD"
-```

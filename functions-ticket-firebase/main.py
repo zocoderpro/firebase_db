@@ -19,7 +19,6 @@ except ValueError:
     initialize_app()
 
 
-
 # ╔══════════════════════════════════════════════════════════════╗
 # ║                                                              ║
 # ║   ZONE LOGIQUE — NE PAS MODIFIER SAUF DEV CONFIRMÉ          ║

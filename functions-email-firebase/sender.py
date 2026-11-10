@@ -16,7 +16,11 @@ from email.mime.text import MIMEText
 
 from config import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
 
+# Détection émulateur — FUNCTIONS_EMULATOR == "true" SEULEMENT en local
+IS_EMULATOR = os.environ.get("FUNCTIONS_EMULATOR") == "true"
+
 _LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "logo.jpeg")
+_GEM_LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "gemlogo.png")
 
 
 def _load_logo_image_part() -> MIMEImage:
@@ -27,6 +31,16 @@ def _load_logo_image_part() -> MIMEImage:
         image = MIMEImage(f.read(), _subtype="jpeg")
     image.add_header("Content-ID", "<logo>")
     image.add_header("Content-Disposition", "inline", filename="logo.jpeg")
+    return image
+
+
+def _load_gem_logo_image_part() -> MIMEImage:
+    """Charge le logo GEM depuis assets/gemlogo.png pour intégration CID.
+    Content-ID "gemlogo" — référencé par GEM_LOGO_URL="cid:gemlogo" dans config.py."""
+    with open(_GEM_LOGO_PATH, "rb") as f:
+        image = MIMEImage(f.read(), _subtype="png")
+    image.add_header("Content-ID", "<gemlogo>")
+    image.add_header("Content-Disposition", "inline", filename="gemlogo.png")
     return image
 
 
@@ -49,6 +63,7 @@ def _build_message(
     x_priority: str = None,
     extra_images: list = None,
     attach_logo: bool = True,
+    logo_type: str = "athena",  # "athena" ou "gem"
     from_name: str = "Athena Event",
 ) -> MIMEMultipart:
     """
@@ -60,6 +75,7 @@ def _build_message(
                    supplémentaires (ex: QR code) à attacher en plus du logo.
     attach_logo  : False pour les templates où le logo Athena n'apparaît pas
                    dans le HTML — évite une pièce jointe cid:logo orpheline.
+    logo_type    : "athena" (cid:logo) ou "gem" (cid:gemlogo)
     from_name    : nom affiché dans l'expéditeur.
     """
     outer = MIMEMultipart('related')
@@ -68,7 +84,10 @@ def _build_message(
     alt.attach(MIMEText(html_content, 'html', 'utf-8'))
     outer.attach(alt)
     if attach_logo:
-        outer.attach(_load_logo_image_part())
+        if logo_type == "gem":
+            outer.attach(_load_gem_logo_image_part())
+        else:
+            outer.attach(_load_logo_image_part())
 
     for cid, image_bytes, subtype in (extra_images or []):
         outer.attach(_build_image_part(cid, image_bytes, subtype))
@@ -96,7 +115,7 @@ def _send_email(msg: MIMEMultipart) -> None:
         raise ValueError("SMTP_PASSWORD manquant — vérifier les variables d'environnement")
 
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
             server.starttls()
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.send_message(msg)
