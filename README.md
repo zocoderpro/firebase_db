@@ -82,5 +82,8 @@ curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-regis
 
 curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-registration-confirmed:publish"   -H "Content-Type: application/json"   -d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"EVENT_VOUCHER","email":"mahefa.ramandimbiarison@basan.mg","voucherCode":"5WU37RNR"}' | base64 -w0)\"}]}"
 
+curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-email-notifications:publish"   -H "Content-Type: application/json"   -d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"SEND_FACTURE_GEM_EVENT","email":"mahefa@gmail.com", "registrationId": "", "userFirstName": "Rakoto", "userLastName": "Nary", "qrCodeToken": "", "totalAmount": 247824" }' | base64 -w0)\"}]}"
 
-
+curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-email-notifications:publish" \
+-H "Content-Type: application/json" \
+-d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"SEND_FACTURE_GEM_EVENT","email":"mahefa@gmail.com","userFirstName":"Rakoto","userLastName":"Nary","eventTitle":"GEM CONNECT & RE-GEM 2026","totalAmount":247824,"raisonSociale":"Entreprise XYZ","adress":"Antananarivo","nif":"1234567890","stat":"12345678901234",  "qrCodeToken": "", "registrationId": ""}' | base64 -w0)\"}]}"

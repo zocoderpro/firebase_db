@@ -1,14 +1,15 @@
-{
-  "functions": [
-    {
-      "source": "functions-email-firebase",
-      "codebase": "email-service",
-      "runtime": "python312"
-    },
+{"functions": [
     {
       "source": "functions-ticket-firebase",
       "codebase": "ticket-service",
-      "runtime": "python312"
+      "runtime": "python312",
+      "timeoutSeconds": 540
+    },
+     {
+      "source": "functions-email-firebase",
+      "codebase": "email-service",
+      "runtime": "python312",
+      "timeoutSeconds": 540
     }
   ],
   "emulators": {

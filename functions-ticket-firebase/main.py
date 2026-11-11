@@ -9,7 +9,7 @@ from firebase_functions import pubsub_fn
 
 from storage import storage_client  # noqa: F401 — déclenche la config de l'émulateur
 from pdf_generator import generate_and_upload_badge
-from email_sender import send_ticket_email_with_qr, send_ticket_email_invited, send_ticket_email_multiticket
+from email_sender import *
 
 # Initialiser Firebase Admin
 # Initialiser Firebase Admin une seule fois (éviter l'erreur "already exists" dans l'émulateur)
@@ -59,6 +59,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
         "RESEND_REGISTRATION_CONFIRMED",
         "RESEND_REGISTRATION_CONFIRMED_INVITED",
         "EVENT_REGISTRATION_CONFIRMED_MULTITICKET",
+        "SEND_FACTURE_GEM_EVENT",
     ]
     if data["type"] not in ACCEPTED_TYPES:
         logging.warning(f"Type incorrect: {data['type']}")
@@ -92,6 +93,8 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
     if missing:
         logging.error(f"Champs manquants: {missing}")
         return
+
+    
     if data["type"] == "RESEND_REGISTRATION_CONFIRMED_INVITED":
         invited_required = [
             "registrationId", "emailDestinateur",
@@ -139,6 +142,61 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
             logging.error(f"Échec traitement billet invité: {e}")
         return
 
+
+    if data["type"] == "SEND_FACTURE_GEM_EVENT":
+
+        # Validation
+        multi_required = [
+            "userEmail", "userFirstName", "userLastName",
+            "eventTitle", "totalAmount"
+        ]
+        missing_multi = [f for f in multi_required if f not in data]
+        if missing_multi:
+            logging.error(f"Champs manquants (send_facture_gem_event): {missing_multi}")
+            return
+        
+        if not data.get("userEmail"):
+            logging.error("Champ 'userEmail' vide ou null — rejeté avant tentative d'envoi")
+            return
+
+        if not data.get("userFirstName"):
+            logging.error("Champ 'userFirstName' vide ou null — rejeté avant tentative d'envoi")
+            return
+        
+        if not data.get("userLastName"):
+            logging.error("Champ 'userLastName' vide ou null — rejeté avant tentative d'envoi")
+            return
+
+        user_email       = data["userEmail"]
+        user_first_name  = data["userFirstName"]
+        user_last_name   = data["userLastName"]
+        event_title      = data["eventTitle"]
+        total_amount     = data["totalAmount"]
+        raison_sociale   = data.get("raisonSociale", "-")
+        adress           = data.get("adress", "-")
+        nif              = data.get("nif", "-")
+        stat             = data.get("stat", "-")
+
+        try:
+            qr_base64_list = []
+
+            send_facture_gem_event(
+                email=user_email,
+                first_name=user_first_name,
+                last_name=user_last_name,
+                event_title=event_title,
+                total_amount=total_amount,
+                facture_pdf_path="test_facutre.pdf",
+                raison_sociale=raison_sociale,
+                adress=adress,
+                nif=nif,
+                stat=stat
+            )
+
+        except Exception as e:
+            logging.error(f"Échec traitement send_facture_gem_event: {e}")
+        return
+    
     # ── Dispatch : plusieurs billets sur un même email ────────────
     if data["type"] == "EVENT_REGISTRATION_CONFIRMED_MULTITICKET":
         multi_required = [
@@ -204,7 +262,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
                 event_image_url=event_image_url,
             )
         except Exception as e:
-            logging.error(f"Échec traitement multi-billets: {e}")
+            logging.error(f"Échec traitement send_facture_gem_event: {e}")
         return
 
     # ── Extraction (types classiques) ────────────────────────────

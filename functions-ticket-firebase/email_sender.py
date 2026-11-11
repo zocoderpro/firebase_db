@@ -9,8 +9,10 @@
 # ╚══════════════════════════════════════════════════════════════╝
 
 import base64
+from email.message import EmailMessage
 import html
 import logging
+import mimetypes
 import os
 import smtplib
 from datetime import datetime
@@ -19,6 +21,12 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+from email.policy import SMTP
+import ssl
+import config
+from render.gem_event_render import render_facture_gem_event, build_facture_gem_event_email
+
+from anyio import Path
 
 from templates_handler import render_email
 
@@ -512,4 +520,70 @@ Antananarivo, Madagascar"""
         logging.info(f"Email multi-billets ({ticket_count}) envoyé à {email}")
     except Exception as e:
         logging.error(f"Erreur envoi email multi-billets : {e}")
+        raise
+
+
+
+
+def send_facture_gem_event(
+    email: str,
+    first_name: str,
+    last_name: str,
+    event_title: str,
+    total_amount: float,
+    raison_sociale: str,
+    facture_pdf_path: str,
+    adress: str = None,
+    nif: str = None,
+    stat: str = None,
+):
+    """
+    Envoie la facture GEM par email avec :
+    - Template HTML personnalisé
+    - Images intégrées (CID)
+    - Facture PDF en pièce jointe
+    """
+
+    SMTP_HOST = config.SMTP_HOST
+    SMTP_PORT = int(config.SMTP_PORT)
+    SMTP_USER = config.SMTP_USER
+    SMTP_PASSWORD = config.SMTP_PASSWORD
+
+    # Vérification de la configuration SMTP
+    if not all([SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD]):
+        logging.error("Configuration SMTP manquante")
+        raise ValueError("Configuration SMTP incomplète")
+
+    try:
+        # Construction du message MIME
+        msg = build_facture_gem_event_email(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            event_title=event_title,
+            total_amount=total_amount,
+            raison_sociale=raison_sociale,
+            facture_pdf_path="test_facutre.pdf",
+            adress=adress,
+            nif=nif,
+            stat=stat,
+        )
+
+        # Expéditeur et réponse
+        msg.replace_header(
+            "From",
+            f"Athena Event <{SMTP_USER}>"
+        )
+        msg["Reply-To"] = SMTP_USER
+
+        # Connexion et envoi SMTP
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+
+        logging.info(f"Facture GEM envoyée avec succès à {email}")
+
+    except Exception as e:
+        logging.exception(f"Erreur lors de l'envoi de la facture GEM à {email}: {e}")
         raise
