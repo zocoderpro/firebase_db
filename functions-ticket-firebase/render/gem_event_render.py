@@ -6,16 +6,17 @@ from pathlib import Path
 from datetime import datetime
 from email.message import EmailMessage
 from email.policy import SMTP
+import pymupdf
+from datetime import datetime
+from num2words import num2words
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-TEMPLATE_PATH = BASE_DIR / "templates" / "facture_gem_event.html"
+TEMPLATE_EMAIL_HTML_PATH = BASE_DIR / "templates" / "facture_gem_event.html"
 ASSETS_DIR = BASE_DIR / "assets" / "gem2026"
-
+TEMPLATE_FACTURE_PDF_PATH = BASE_DIR / "templates" / "facture_gem_event_template.pdf"
 PREHEADER_FILLER = "&nbsp;&#8204;" * 60
-
-# Correspondance entre les CID du HTML et les fichiers images
 INLINE_IMAGES = {
     "gembanner": "gembanner.jpeg",
     "gembanner_mobile": "gembanner_mobile.jpeg",
@@ -26,7 +27,7 @@ INLINE_IMAGES = {
 def render_facture_gem_event(first_name: str) -> str:
     """Charge le template HTML et injecte les variables."""
 
-    with open(TEMPLATE_PATH, "r", encoding="utf-8") as file:
+    with open(TEMPLATE_EMAIL_HTML_PATH, "r", encoding="utf-8") as file:
         template = file.read()
 
     context = {
@@ -54,7 +55,7 @@ def build_facture_gem_event_email(
     event_title: str,
     total_amount: float,
     raison_sociale: str,
-    facture_pdf_path: str,
+    facture_num: str,
     adress: str = None,
     nif: str = None,
     stat: str = None,
@@ -129,7 +130,7 @@ def build_facture_gem_event_email(
         )
 
     # Facture PDF en pièce jointe
-    pdf_path = Path(facture_pdf_path)
+    pdf_path = Path(TEMPLATE_FACTURE_PDF_PATH)
 
     if not pdf_path.is_file():
         raise FileNotFoundError(
@@ -139,11 +140,127 @@ def build_facture_gem_event_email(
     with open(pdf_path, "rb") as pdf_file:
         pdf_data = pdf_file.read()
 
+    pdf_data = replace_pdf_text(
+        pdf_path=str(pdf_path),
+        invoice_number=facture_num,
+        raison_social=raison_sociale,
+        adresse=adress or "",
+        nif_company=nif or "",
+        stat_company=stat or "",
+        total_amount=total_amount,
+        first_name_last_name=f"{first_name} {last_name.upper()}"
+    )
+
     msg.add_attachment(
         pdf_data,
         maintype="application",
         subtype="pdf",
-        filename=pdf_path.name
+        filename="Facture_GEM_CONNECT_2026.pdf"
     )
 
     return msg
+
+
+def replace_pdf_text(
+    pdf_path: str,
+    invoice_number: str,
+    raison_social: str,
+    adresse: str,
+    nif_company: str,
+    stat_company: str,
+    total_amount: float,
+    first_name_last_name: str,
+) -> bytes:
+    """Remplace des textes spécifiques dans le PDF."""
+
+    doc = pymupdf.open(pdf_path)
+
+    try:
+        for page in doc:
+
+            replacements = [
+                {
+                    "search": "ND N°330.2026 PART-GEM CONNECT & RE-GEM",
+                    "replacement": f"ND N°{invoice_number}.2026 PART-GEM CONNECT & RE-GEM",
+                    "fontsize": 11,
+                    "color": (68 / 255, 114 / 255, 196 / 255),
+                },
+                {
+                    "search": "{{data_now}}",
+                    "replacement": datetime.now().strftime("%d %B %Y"),
+                    "fontsize": 11,
+                    "color": (0, 0, 0),
+                },
+                {
+                    "search": "{{raison_social}}",
+                    "replacement": raison_social,
+                    "fontsize": 11,
+                    "color": (0, 0, 0),
+                },
+                {
+                    "search": "{{adresse}}",
+                    "replacement": adresse,
+                    "fontsize": 11,
+                    "color": (0, 0, 0),
+                },
+                {
+                    "search": "{{nif_company}}",
+                    "replacement": nif_company,
+                    "fontsize": 11,
+                    "color": (0, 0, 0),
+                },
+                {
+                    "search": "{{stat_company}}",
+                    "replacement": stat_company,
+                    "fontsize": 11,
+                    "color": (0, 0, 0),
+                },
+                {
+                    "search": "{{amount_number}}",
+                    "replacement": f"{total_amount:,.0f}".replace(",", " "),
+                    "fontsize": 11,
+                    "color": (0, 0, 0),
+                },
+                {
+                    "search": "({{amount_letter}})",
+                    "replacement": f"({num2words(total_amount, lang='fr')})",
+                    "fontsize": 11,
+                    "color": (0, 0, 0),
+                },
+                {
+                    "search": "{{first_name_last_name}}",
+                    "replacement": first_name_last_name,
+                    "fontsize": 11,
+                    "color": (0, 0, 0),
+                },
+            ]
+
+            for item in replacements:
+                areas = page.search_for(item["search"])
+
+                # Trier les occurrences de haut en bas
+                areas.sort(key=lambda rect: (rect.y0, rect.x0))
+
+                occurrence = 0
+
+                if occurrence >= len(areas):
+                    continue
+
+                area = areas[occurrence]
+
+                # Masquer l'ancien texte
+                page.add_redact_annot(area, fill=(1, 1, 1))
+                page.apply_redactions()
+
+                # Insérer le nouveau texte
+                page.insert_text(
+                    (area.x0, area.y1 - 2),
+                    item["replacement"],
+                    fontsize=item["fontsize"],
+                    color=item["color"]
+                )
+
+        return doc.tobytes()
+
+    finally:
+        doc.close()

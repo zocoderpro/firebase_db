@@ -26,6 +26,7 @@ import ssl
 import config
 from render.gem_event_render import render_facture_gem_event, build_facture_gem_event_email
 
+
 from anyio import Path
 
 from templates_handler import render_email
@@ -532,7 +533,7 @@ def send_facture_gem_event(
     event_title: str,
     total_amount: float,
     raison_sociale: str,
-    facture_pdf_path: str,
+    facture_num: str,
     adress: str = None,
     nif: str = None,
     stat: str = None,
@@ -563,7 +564,7 @@ def send_facture_gem_event(
             event_title=event_title,
             total_amount=total_amount,
             raison_sociale=raison_sociale,
-            facture_pdf_path="test_facutre.pdf",
+            facture_num=facture_num,
             adress=adress,
             nif=nif,
             stat=stat,

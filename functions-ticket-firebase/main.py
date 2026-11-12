@@ -148,7 +148,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
         # Validation
         multi_required = [
             "userEmail", "userFirstName", "userLastName",
-            "eventTitle", "totalAmount"
+            "eventTitle", "totalAmount", "factureNum",
         ]
         missing_multi = [f for f in multi_required if f not in data]
         if missing_multi:
@@ -167,11 +167,16 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
             logging.error("Champ 'userLastName' vide ou null — rejeté avant tentative d'envoi")
             return
 
+        if not data.get("factureNum"):
+            logging.error("Champ 'factureNum' vide ou null — rejeté avant tentative d'envoi")
+            return
+
         user_email       = data["userEmail"]
         user_first_name  = data["userFirstName"]
         user_last_name   = data["userLastName"]
         event_title      = data["eventTitle"]
         total_amount     = data["totalAmount"]
+        facutre_num      = data["factureNum"]
         raison_sociale   = data.get("raisonSociale", "-")
         adress           = data.get("adress", "-")
         nif              = data.get("nif", "-")
@@ -186,7 +191,7 @@ def send_event_ticket(event: pubsub_fn.CloudEvent[pubsub_fn.MessagePublishedData
                 last_name=user_last_name,
                 event_title=event_title,
                 total_amount=total_amount,
-                facture_pdf_path="test_facutre.pdf",
+                facture_num=facutre_num,
                 raison_sociale=raison_sociale,
                 adress=adress,
                 nif=nif,

@@ -86,4 +86,9 @@ curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-email
 
 curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-email-notifications:publish" \
 -H "Content-Type: application/json" \
--d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"SEND_FACTURE_GEM_EVENT","email":"mahefa@gmail.com","userFirstName":"Rakoto","userLastName":"Nary","eventTitle":"GEM CONNECT & RE-GEM 2026","totalAmount":247824,"raisonSociale":"Entreprise XYZ","adress":"Antananarivo","nif":"1234567890","stat":"12345678901234",  "qrCodeToken": "", "registrationId": ""}' | base64 -w0)\"}]}"
+-d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"SEND_FACTURE_GEM_EVENT","email":"ranjafytsito@gmail.com","userFirstName":"Tsitohaina","userLastName":"Ramiaranjafy","eventTitle":"GEM CONNECT & RE-GEM 2026","totalAmount":247824,"raisonSociale":"Entreprise XYZ","adress":"Antananarivo","nif":"1234567890","stat":"12345678901234",  "qrCodeToken": "", "registrationId": "", "factureNum": "301"}' | base64 -w0)\"}]}"
+
+
+curl -X POST "http://localhost:8085/v1/projects/demo-event-app/topics/prod-email-notifications:publish" \
+-H "Content-Type: application/json" \
+-d "{\"messages\":[{\"data\":\"$(echo -n '{"type":"SEND_FACTURE_GEM_EVENT","email":"david@clearmind-analytics.com","userFirstName":"David Fitiana","userLastName":"Rakotomananjara","eventTitle":"GEM CONNECT & RE-GEM 2026","totalAmount":4700000,"raisonSociale":"Clearmind Analytics","adress":"Ambatomaro Antananarivo","nif":"1234567890","stat":"12345678901234",  "qrCodeToken": "", "registrationId": "", "factureNum": "305"}' | base64 -w0)\"}]}"
